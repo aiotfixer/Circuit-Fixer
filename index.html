@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Circuit Fixer - NTUT AIoTFixer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: { dark: '#050b14', panel: '#0f172a', line: '#334155', glow: '#0ea5e9', success: '#10b981', danger: '#ef4444' }
+                    },
+                    fontFamily: { mono: ['Share Tech Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 鎖定手機畫面防滑動 */
+        body { overscroll-behavior-y: none; touch-action: none; }
+        
+        /* 霓虹發光特效 */
+        .neon-glow { filter: drop-shadow(0 0 8px #0ea5e9) drop-shadow(0 0 12px #0ea5e9); }
+        .neon-success { filter: drop-shadow(0 0 10px #10b981) drop-shadow(0 0 15px #10b981); }
+        .neon-text { text-shadow: 0 0 8px rgba(14, 165, 233, 0.8); }
+        
+        /* SVG 內部線條共用樣式 */
+        .wire-base { fill: none; stroke-linecap: round; stroke-linejoin: round; transition: all 0.3s ease; }
+        .wire-off { stroke: #334155; }
+        .wire-on { stroke: #0ea5e9; }
+        .wire-finish { stroke: #10b981; }
+        
+        /* 方塊旋轉動畫 */
+        .tile { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* 浮動加分動畫 */
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
+            80% { opacity: 1; transform: translate(-50%, -60px) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -80px) scale(0.8); }
+        }
+        .animate-float-up { animation: floatUp 1.2s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-cyber-dark text-white h-screen w-screen overflow-hidden flex flex-col font-mono select-none overscroll-none">
+
+    <div id="game-toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl border border-slate-600 z-[100] transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+        提示訊息
+    </div>
+
+    <!-- 頂部資訊列 -->
+    <header class="flex-none bg-cyber-panel border-b border-cyan-900/50 p-3 md:p-4 flex justify-between items-center z-10 shadow-lg shadow-cyan-900/20 relative">
+        <div class="flex items-center gap-2 md:gap-3">
+            <div class="bg-cyan-500/20 text-cyan-400 p-2 rounded flex items-center justify-center border border-cyan-500/30">
+                <i class="fa-solid fa-bolt text-lg md:text-xl"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-bold text-sm md:text-lg text-cyan-400 tracking-wider neon-text leading-tight" data-i18n="headerTitle">短路搶修</h1>
+                    <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-800 text-slate-300 hover:text-white px-2 py-0.5 rounded text-[10px] md:text-xs border border-slate-700 transition-colors">EN</button>
+                </div>
+                <div class="text-[10px] md:text-xs text-slate-400">NTUT AIoTFixer</div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 md:gap-8">
+            <div class="text-center">
+                <div class="text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">LEVEL</div>
+                <div class="text-lg md:text-2xl font-bold text-white"><i class="fa-solid fa-layer-group text-slate-500 text-sm sm:hidden mr-1"></i><span id="ui-level">1</span></div>
+            </div>
+            <div class="text-center">
+                <div class="text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">SCORE</div>
+                <div class="text-lg md:text-2xl font-bold text-emerald-400"><i class="fa-solid fa-star text-emerald-700 text-sm sm:hidden mr-1"></i><span id="ui-score">0</span></div>
+            </div>
+            <div class="text-center bg-slate-900 px-3 py-1 rounded border border-slate-700">
+                <div class="text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">TIMER</div>
+                <div id="ui-timer" class="text-lg md:text-2xl font-bold text-rose-400 w-12 md:w-16"><i class="fa-regular fa-clock text-rose-800 text-sm sm:hidden mr-1"></i>60</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 遊戲主要區域 -->
+    <main class="flex-grow relative flex items-center justify-center p-2 md:p-6 overflow-hidden">
+        
+        <!-- 核心電路板容器 (將 justify-between 改為 justify-center，讓元素緊靠) -->
+        <div class="w-full max-w-5xl flex items-stretch justify-center gap-1 md:gap-4 h-full max-h-[800px] relative">
+            
+            <!-- 左側：電源起點 -->
+            <div class="flex flex-col justify-center items-end relative w-16 md:w-28 flex-shrink-0">
+                <!-- 起點粗連接線 -->
+                <div class="absolute left-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-cyan-500 z-0 pointer-events-none"></div>
+                <div class="bg-cyber-panel border-2 border-cyan-800 rounded-lg p-2 text-center w-full relative z-10 shadow-lg flex flex-col items-center">
+                    <i class="fa-solid fa-plug text-cyan-500 text-2xl md:text-4xl mb-1 md:mb-2"></i>
+                    <div class="text-[10px] md:text-xs font-bold text-cyan-400 leading-tight">110V<br>AC</div>
+                </div>
+            </div>
+
+            <!-- 中央：動態解謎網格 (將最大寬度限制移至外層，並取消 flex-grow 避免無限拉伸) -->
+            <div class="w-full max-w-[500px] lg:max-w-[600px] flex items-center justify-center p-1 md:p-2 bg-cyber-panel/50 rounded-xl border border-slate-800 relative z-20 shadow-2xl backdrop-blur-md">
+                <div id="gameBoard" class="grid gap-1 md:gap-1.5 w-full aspect-square relative bg-slate-950 p-2 md:p-3 rounded-lg" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+                    <!-- 方塊將由 JavaScript 動態生成 -->
+                </div>
+            </div>
+
+            <!-- 右側：待修復家電 -->
+            <div class="flex flex-col justify-center items-start relative w-16 md:w-28 flex-shrink-0">
+                <!-- 終點粗連接線 -->
+                <div id="endLine" class="absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-cyber-line z-0 pointer-events-none transition-colors duration-300"></div>
+                <div id="applianceBox" class="bg-cyber-panel border-2 border-slate-700 rounded-lg p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center shadow-lg">
+                    <i id="applianceIcon" class="fa-solid fa-fan text-slate-500 text-2xl md:text-4xl mb-1 md:mb-2 transition-colors duration-300"></i>
+                    <div id="applianceText" class="text-[10px] md:text-xs font-bold text-slate-500 leading-tight transition-colors duration-300">DC FAN<br>OFF</div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- 開始畫面 Overlay -->
+        <div id="overlay-start" class="absolute inset-0 bg-cyber-dark/90 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+            <i class="fa-solid fa-triangle-exclamation text-rose-500 text-6xl mb-4 neon-text"></i>
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-2 tracking-tight" data-i18n="startTitle">電器短路搶修</h2>
+            <p class="text-slate-400 text-sm md:text-base mb-8 text-center max-w-sm px-4" data-i18n="startDesc">點擊方塊旋轉電線，將左側電源接通至右側家電。<br>隨著關卡推進，電路板將擴展至最大 9x9！</p>
+            <button onclick="startGame()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-10 rounded-full text-lg shadow-[0_0_15px_rgba(14,165,233,0.5)] transition-all transform hover:scale-105" data-i18n="startBtn">
+                開始搶修
+            </button>
+        </div>
+
+        <!-- 遊戲結束畫面 Overlay -->
+        <div id="overlay-gameover" class="absolute inset-0 bg-cyber-dark/95 backdrop-blur-md flex flex-col items-center justify-center z-50 hidden">
+            <h2 class="text-4xl md:text-6xl font-bold text-rose-500 mb-2">TIME'S UP</h2>
+            <p class="text-slate-300 text-lg md:text-xl mb-6" data-i18n="gameOverDesc">搶修時間結束！</p>
+            <div class="bg-cyber-panel border border-slate-700 p-6 rounded-xl text-center mb-6 w-64 shadow-2xl">
+                <div class="text-sm text-slate-500 mb-1" data-i18n="finalScore">總得分</div>
+                <div class="text-5xl font-bold text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]" id="final-score">0</div>
+                <div class="text-sm text-slate-500 mt-4 mb-1" data-i18n="finalLevel">抵達關卡</div>
+                <div class="text-2xl font-bold text-cyan-400" id="final-level">1</div>
+            </div>
+
+            <div class="w-64 mb-8 space-y-3">
+                <input type="text" id="playerName" placeholder="輸入姓名 (如: 電機謝同學)" data-i18n-placeholder="namePlaceholder" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-center focus:outline-none focus:border-cyan-500 transition-colors" maxlength="12">
+                <button id="btn-submit-score" onclick="submitScore()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-lg text-sm shadow-[0_0_15px_rgba(217,119,6,0.5)] transition-all" data-i18n="submitBtn">
+                    送出成績
+                </button>
+            </div>
+
+            <button onclick="initGame()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-10 rounded-full text-lg shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all transform hover:scale-105" data-i18n="retryBtn">
+                重新挑戰
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        const DIR_TOP = 0;
+        const DIR_RIGHT = 1;
+        const DIR_BOTTOM = 2;
+        const DIR_LEFT = 3;
+
+        const TILE_STRAIGHT = 1; // 直線
+        const TILE_CORNER = 2;   // 轉角
+        const TILE_T_SHAPE = 3;  // T型
+        const TILE_CROSS = 4;    // 十字型
+
+        // 隨機家電清單 (新增更多電器)
+        const appliances = [
+            { icon: 'fa-fan', name: 'DC FAN' },
+            { icon: 'fa-lightbulb', name: 'LAMP' },
+            { icon: 'fa-tv', name: 'TV' },
+            { icon: 'fa-blender', name: 'BLENDER' },
+            { icon: 'fa-fire-burner', name: 'COOKER' }
+        ];
+
+        // 遊戲狀態
+        let board = [];
+        let currentGridSize = 5;
+        let startRow = 2;
+        let startCol = 0;
+        let endRow = 2;
+        let endCol = 4;
+        let currentAppliance = appliances[0];
+        
+        let level = 1;
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let isPlaying = false;
+        let isAnimating = false;
+
+        // --- 翻譯字典 (i18n) ---
+        let currentLang = 'zh';
+        const i18n = {
+            zh: {
+                headerTitle: "電路維修員",
+                startTitle: "電路維修員",
+                startDesc: "點擊方塊旋轉電線，將左側電源接通至右側家電。<br>隨著關卡推進，電路板將擴展至最大 9x9！",
+                startBtn: "開始搶修",
+                gameOverDesc: "搶修時間結束！",
+                finalScore: "總得分",
+                finalLevel: "抵達關卡",
+                namePlaceholder: "輸入學號",
+                submitBtn: "送出成績",
+                retryBtn: "重新挑戰",
+                toastSuccess: "成績已發送至試算表！",
+                toastFail: "網路連線不穩，成績上傳失敗",
+                toastTest: "尚未設定 GAS 網址，已完成本機測試",
+                btnSubmitting: "上傳中...",
+                btnSubmitted: "已上傳",
+                btnTestDone: "測試完成"
+            },
+            en: {
+                headerTitle: "Circuit Fixer",
+                startTitle: "Circuit Fixer",
+                startDesc: "Tap the tiles to rotate the wires and connect power to the appliance.<br>The board expands up to 9x9 as you progress!",
+                startBtn: "START REPAIR",
+                gameOverDesc: "Repair time is over!",
+                finalScore: "Total Score",
+                finalLevel: "Level Reached",
+                namePlaceholder: "Enter Student ID",
+                submitBtn: "Submit Score",
+                retryBtn: "Try Again",
+                toastSuccess: "Score sent to spreadsheet!",
+                toastFail: "Connection unstable, upload failed.",
+                toastTest: "GAS URL not set, test mode only.",
+                btnSubmitting: "Submitting...",
+                btnSubmitted: "Submitted",
+                btnTestDone: "Test Done"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            document.getElementById('langBtn').innerText = currentLang === 'zh' ? 'EN' : 'ZH';
+            document.title = currentLang === 'zh' ? "電路維修員 - NTUT AIoTFixer" : "Circuit Fixer - NTUT AIoTFixer";
+            applyLanguage();
+        }
+
+        function applyLanguage() {
+            // 切換一般文字內容
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    el.innerHTML = i18n[currentLang][key];
+                }
+            });
+
+            // 切換輸入框提示文字 (Placeholder)
+            const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+            placeholders.forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (i18n[currentLang][key]) {
+                    el.setAttribute('placeholder', i18n[currentLang][key]);
+                }
+            });
+            
+            // 確保送出按鈕的狀態文字正確
+            const submitBtn = document.getElementById('btn-submit-score');
+            if (submitBtn && !submitBtn.disabled) {
+                submitBtn.innerText = i18n[currentLang].submitBtn;
+            }
+        }
+
+        // 分數差異化紀錄變數
+        let levelClicks = 0;
+        let levelStartTime = 0;
+
+        const boardEl = document.getElementById('gameBoard');
+
+        // 注意：線條寬度設為 24，在響應式網格中會剛好與外側的 absolute 接頭視覺粗細一致
+        const SVG_STRAIGHT = `
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <line x1="50" y1="0" x2="50" y2="100" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
+            </svg>`;
+            
+        const SVG_CORNER = `
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <path d="M 50 0 L 50 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
+            </svg>`;
+
+        const SVG_T_SHAPE = `
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <path d="M 50 0 L 50 100 M 50 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
+            </svg>`;
+            
+        const SVG_CROSS = `
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <path d="M 50 0 L 50 100 M 0 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
+            </svg>`;
+
+        function initGame() {
+            level = 1;
+            score = 0;
+            timeLeft = 60;
+            updateUI();
+            
+            const submitBtn = document.getElementById('btn-submit-score');
+            if(submitBtn) {
+                submitBtn.innerText = i18n[currentLang].submitBtn;
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75');
+            }
+            
+            document.getElementById('overlay-gameover').classList.add('hidden');
+            document.getElementById('overlay-start').classList.remove('hidden');
+            clearInterval(timerInterval);
+        }
+
+        function startGame() {
+            document.getElementById('overlay-start').classList.add('hidden');
+            isPlaying = true;
+            nextLevel();
+            
+            timerInterval = setInterval(() => {
+                if (!isPlaying) return;
+                timeLeft--;
+                updateUI();
+                if (timeLeft <= 0) {
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-level').textContent = level;
+            document.getElementById('overlay-gameover').classList.remove('hidden');
+        }
+
+        function updateUI() {
+            document.getElementById('ui-level').textContent = level;
+            document.getElementById('ui-score').textContent = score;
+            document.getElementById('ui-timer').textContent = timeLeft;
+        }
+
+        function nextLevel() {
+            isAnimating = true;
+            
+            // 重置點擊次數與記錄開始時間
+            levelClicks = 0;
+            levelStartTime = Date.now();
+            
+            // 隨機抽選一台故障家電
+            currentAppliance = appliances[Math.floor(Math.random() * appliances.length)];
+            resetApplianceUI();
+
+            // 根據關卡動態擴展網格大小 (5x5 -> 7x7 -> 9x9)
+            if (level <= 2) currentGridSize = 5;
+            else if (level <= 5) currentGridSize = 7;
+            else currentGridSize = 9;
+
+            // 起點終點始終保持在垂直正中央
+            startRow = Math.floor(currentGridSize / 2);
+            startCol = 0;
+            endRow = Math.floor(currentGridSize / 2);
+            endCol = currentGridSize - 1;
+
+            // 設定 CSS Grid 欄位數
+            boardEl.style.gridTemplateColumns = `repeat(${currentGridSize}, minmax(0, 1fr))`;
+
+            // 初始化二維陣列
+            board = Array(currentGridSize).fill(null).map(() => Array(currentGridSize).fill(null));
+            
+            // 1. 產生必勝路徑 (DFS)
+            let path = generateRandomPath(currentGridSize, startRow, startCol, endRow, endCol);
+
+            // 2. 配置正確的方塊類型
+            for (let i = 0; i < path.length; i++) {
+                let curr = path[i];
+                let prev = i > 0 ? path[i-1] : {r: startRow, c: startCol - 1}; // 起點外側虛擬節點
+                let next = i < path.length - 1 ? path[i+1] : {r: endRow, c: endCol + 1}; // 終點外側虛擬節點
+
+                let dr1 = curr.r - prev.r, dc1 = curr.c - prev.c;
+                let dr2 = next.r - curr.r, dc2 = next.c - curr.c;
+
+                // 決定電流的入口與出口方向
+                let inDir = (dr1 === -1) ? DIR_BOTTOM : (dr1 === 1) ? DIR_TOP : (dc1 === -1) ? DIR_RIGHT : DIR_LEFT;
+                let outDir = (dr2 === -1) ? DIR_TOP : (dr2 === 1) ? DIR_BOTTOM : (dc2 === -1) ? DIR_LEFT : DIR_RIGHT;
+
+                // 根據路徑決定可用的方塊類型 (加入 T型與十字型)
+                let typeOptions = [];
+                if (inDir === (outDir + 2) % 4) {
+                    typeOptions = [TILE_STRAIGHT, TILE_CROSS, TILE_T_SHAPE]; // 直線關係
+                } else {
+                    typeOptions = [TILE_CORNER, TILE_T_SHAPE, TILE_CROSS];   // 轉角關係
+                }
+
+                // 隨機選一個支援此路徑的類型 (降低複雜方塊出現機率，保持畫面清爽)
+                let type = typeOptions[0]; 
+                if (level > 2 && Math.random() > 0.75) {
+                    type = typeOptions[Math.floor(Math.random() * typeOptions.length)];
+                }
+
+                board[curr.r][curr.c] = {
+                    type: type,
+                    rot: Math.floor(Math.random() * 4), // 隨機打亂初始角度
+                    isPowered: false,
+                    isPath: true // 標記為必勝路徑，避免後續覆蓋
+                };
+            }
+
+            // 3. 填滿其餘干擾方塊
+            for (let r = 0; r < currentGridSize; r++) {
+                for (let c = 0; c < currentGridSize; c++) {
+                    if (!board[r][c]) {
+                        // 隨機生成干擾方塊 (大幅降低 T 型與十字型的出現機率)
+                        let rand = Math.random();
+                        let fType = TILE_CORNER;
+                        if (rand > 0.95) fType = TILE_CROSS;         // 5% 機率出現十字
+                        else if (rand > 0.85) fType = TILE_T_SHAPE;  // 10% 機率出現 T 型
+                        else if (rand > 0.45) fType = TILE_STRAIGHT; // 40% 機率出現直線
+                                                                     // 剩下 45% 機率為轉角
+
+                        board[r][c] = {
+                            type: fType,
+                            rot: Math.floor(Math.random() * 4),
+                            isPowered: false,
+                            isPath: false
+                        };
+                    }
+                }
+            }
+
+            renderBoard();
+            checkPowerConnection();
+            isAnimating = false;
+        }
+
+        function resetApplianceUI() {
+            const icon = document.getElementById('applianceIcon');
+            const box = document.getElementById('applianceBox');
+            const text = document.getElementById('applianceText');
+            const line = document.getElementById('endLine');
+
+            icon.className = `fa-solid ${currentAppliance.icon} text-slate-500 text-2xl md:text-4xl mb-1 md:mb-2 transition-all duration-300`;
+            box.className = "bg-cyber-panel border-2 border-slate-700 rounded-lg p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center shadow-lg";
+            text.innerHTML = `${currentAppliance.name}<br>OFF`;
+            text.className = "text-[10px] md:text-xs font-bold text-slate-500 leading-tight transition-colors duration-300";
+            line.className = "absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-cyber-line z-0 pointer-events-none transition-colors duration-300";
+        }
+
+        function generateRandomPath(size, sr, sc, er, ec) {
+            let path = [];
+            let visited = Array(size).fill(false).map(() => Array(size).fill(false));
+            
+            function dfs(r, c) {
+                if (r < 0 || r >= size || c < 0 || c >= size || visited[r][c]) return false;
+                
+                path.push({r, c});
+                visited[r][c] = true;
+
+                if (r === er && c === ec) return true; // 抵達終點
+
+                // 隨機化搜尋方向 (上右下左)
+                let dirs = [[-1,0], [0,1], [1,0], [0,-1]];
+                dirs.sort(() => Math.random() - 0.5);
+
+                for (let d of dirs) {
+                    // 為了美觀，避免產生太曲折的死亡螺旋，限制只能朝著終點大方向走，或者允許小繞路
+                    if (dfs(r + d[0], c + d[1])) return true;
+                }
+
+                path.pop(); // 回溯
+                visited[r][c] = false;
+                return false;
+            }
+
+            // 強制從起點往右出發，確保起點連線順暢
+            path.push({r: sr, c: sc});
+            visited[sr][sc] = true;
+            if (!dfs(sr, sc + 1)) {
+                // 防呆：如果隨機失敗，產生直線
+                path = [];
+                for(let i=0; i<size; i++) path.push({r:sr, c:i});
+            }
+
+            return path;
+        }
+
+        function renderBoard() {
+            boardEl.innerHTML = '';
+            for (let r = 0; r < currentGridSize; r++) {
+                for (let c = 0; c < currentGridSize; c++) {
+                    const tile = board[r][c];
+                    const div = document.createElement('div');
+                    div.id = `tile-${r}-${c}`;
+                    div.className = `w-full h-full bg-slate-900 rounded md:rounded-lg cursor-pointer tile flex items-center justify-center border border-slate-800 hover:bg-slate-800 overflow-hidden`;
+                    // 點擊旋轉事件
+                    div.onclick = () => rotateTile(r, c);
+                    
+                    let svgStr = "";
+                    if (tile.type === TILE_STRAIGHT) svgStr = SVG_STRAIGHT;
+                    else if (tile.type === TILE_CORNER) svgStr = SVG_CORNER;
+                    else if (tile.type === TILE_T_SHAPE) svgStr = SVG_T_SHAPE;
+                    else if (tile.type === TILE_CROSS) svgStr = SVG_CROSS;
+
+                    // 初始化時先設定為未通電顏色
+                    svgStr = svgStr.replace('{{STATE_CLASS}}', 'wire-off');
+                    
+                    div.innerHTML = svgStr;
+                    div.style.transform = `rotate(${tile.rot * 90}deg)`;
+                    boardEl.appendChild(div);
+                }
+            }
+        }
+
+        function rotateTile(r, c) {
+            if (!isPlaying || isAnimating) return;
+            
+            levelClicks++; // 記錄點擊步數
+            
+            board[r][c].rot = (board[r][c].rot + 1) % 4;
+            const el = document.getElementById(`tile-${r}-${c}`);
+            el.style.transform = `rotate(${board[r][c].rot * 90}deg)`;
+            
+            // 每次旋轉後重新計算電力
+            checkPowerConnection();
+        }
+
+        function getOutputs(tile) {
+            // 根據方塊類型與當前旋轉角度，回傳它會往哪些方向輸出
+            // 0:上, 1:右, 2:下, 3:左
+            if (tile.type === TILE_STRAIGHT) {
+                return (tile.rot % 2 === 0) ? [0, 2] : [1, 3];
+            } else if (tile.type === TILE_CORNER) {
+                if (tile.rot === 0) return [0, 1];
+                if (tile.rot === 1) return [1, 2];
+                if (tile.rot === 2) return [2, 3];
+                if (tile.rot === 3) return [3, 0];
+            } else if (tile.type === TILE_T_SHAPE) {
+                if (tile.rot === 0) return [0, 1, 2];
+                if (tile.rot === 1) return [1, 2, 3];
+                if (tile.rot === 2) return [2, 3, 0];
+                if (tile.rot === 3) return [3, 0, 1];
+            } else if (tile.type === TILE_CROSS) {
+                return [0, 1, 2, 3];
+            }
+            return [];
+        }
+
+        function checkPowerConnection() {
+            // 1. 重置所有通電狀態
+            for (let r = 0; r < currentGridSize; r++) {
+                for (let c = 0; c < currentGridSize; c++) {
+                    board[r][c].isPowered = false;
+                }
+            }
+
+            // 2. BFS 尋找連通
+            // 佇列元素：{r, c, 入口方向}
+            // 起點：固定在 (startRow, 0)，電力從左邊 (DIR_LEFT = 3) 進入
+            let queue = [{r: startRow, c: startCol, incomingDir: DIR_LEFT}];
+            let levelComplete = false;
+
+            while (queue.length > 0) {
+                let curr = queue.shift();
+                let tile = board[curr.r][curr.c];
+
+                // 取得此方塊能接通的方向
+                let outputs = getOutputs(tile);
+
+                // 如果方塊的開口正好有接住「入口方向」，代表通電成功
+                if (outputs.includes(curr.incomingDir) && !tile.isPowered) {
+                    tile.isPowered = true;
+
+                    // 找出電力要從哪些開口繼續輸出 (支援多分支分流)
+                    let outDirs = outputs.filter(d => d !== curr.incomingDir);
+                    
+                    for (let outDir of outDirs) {
+                        // 決定下一個方塊的座標
+                        let nr = curr.r, nc = curr.c;
+                        if (outDir === DIR_TOP) nr--;
+                        else if (outDir === DIR_RIGHT) nc++;
+                        else if (outDir === DIR_BOTTOM) nr++;
+                        else if (outDir === DIR_LEFT) nc--;
+
+                        // 判斷勝利：如果電力抵達終點方塊 (endRow, endCol) 且向右輸出 (DIR_RIGHT)
+                        if (curr.r === endRow && curr.c === endCol && outDir === DIR_RIGHT) {
+                            levelComplete = true;
+                        } 
+                        // 否則繼續傳遞電力到下個網格
+                        else if (nr >= 0 && nr < currentGridSize && nc >= 0 && nc < currentGridSize) {
+                            // 下個方塊的入口方向，剛好是當前方塊出口方向的相反
+                            let nextIncomingDir = (outDir + 2) % 4;
+                            queue.push({r: nr, c: nc, incomingDir: nextIncomingDir});
+                        }
+                    }
+                }
+            }
+
+            updateDomStyles(levelComplete);
+
+            // 處理過關
+            if (levelComplete) {
+                isAnimating = true;
+                handleLevelComplete();
+            }
+        }
+
+        function updateDomStyles(isComplete) {
+            for (let r = 0; r < currentGridSize; r++) {
+                for (let c = 0; c < currentGridSize; c++) {
+                    const tile = board[r][c];
+                    const el = document.getElementById(`tile-${r}-${c}`);
+                    const pathEl = el.querySelector('.wire-base');
+                    
+                    // 移除舊狀態
+                    pathEl.classList.remove('wire-off', 'wire-on', 'wire-finish');
+                    el.classList.remove('neon-glow', 'neon-success', 'border-cyan-500', 'border-emerald-500', 'border-slate-800');
+                    
+                    if (isComplete && tile.isPowered) {
+                        pathEl.classList.add('wire-finish');
+                        el.classList.add('neon-success', 'border-emerald-500');
+                    } else if (tile.isPowered) {
+                        pathEl.classList.add('wire-on');
+                        el.classList.add('neon-glow', 'border-cyan-500');
+                    } else {
+                        pathEl.classList.add('wire-off');
+                        el.classList.add('border-slate-800');
+                    }
+                }
+            }
+        }
+
+        function handleLevelComplete() {
+            // 右側家電啟動特效
+            const icon = document.getElementById('applianceIcon');
+            const box = document.getElementById('applianceBox');
+            const text = document.getElementById('applianceText');
+            const line = document.getElementById('endLine');
+
+            line.className = "absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-emerald-500 z-0 pointer-events-none transition-colors duration-300";
+            box.className = "bg-cyber-panel border-2 border-emerald-500 rounded-lg p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center neon-success shadow-lg";
+            
+            icon.className = `fa-solid ${currentAppliance.icon} text-emerald-400 text-2xl md:text-4xl mb-1 md:mb-2 animate-bounce`;
+            
+            // 針對風扇和果汁機，使用旋轉特效代替彈跳
+            if(currentAppliance.icon === 'fa-fan' || currentAppliance.icon === 'fa-blender') {
+                icon.classList.add('animate-spin');
+                icon.classList.remove('animate-bounce');
+            }
+            
+            text.innerHTML = `${currentAppliance.name}<br>ON`;
+            text.className = "text-[10px] md:text-xs font-bold text-emerald-400 leading-tight";
+
+            // 計算差異化分數
+            let timeSpent = Math.max(1, Math.floor((Date.now() - levelStartTime) / 1000));
+            let baseScore = level * 100;
+            
+            // 1. 速度加分：越快完成分數越高 (基準為 30 秒)
+            let timeBonus = Math.max(0, 30 - timeSpent) * 10 * level;
+            
+            // 2. 步數加分：點擊次數越少分數越高 (容錯基準為總格數的 3 倍)
+            let clickTarget = currentGridSize * currentGridSize * 3;
+            let clickBonus = Math.max(0, clickTarget - levelClicks) * 5 * level;
+
+            // 結算總得分
+            let earnedScore = Math.floor(baseScore + timeBonus + clickBonus);
+            score += earnedScore;
+
+            // 顯示浮動加分特效
+            showFloatingScore(earnedScore);
+
+            // 紙花慶祝
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#0ea5e9', '#10b981', '#ffffff', '#f59e0b']
+            });
+
+            // 延時與過關
+            timeLeft += 10;
+            level++;
+            updateUI();
+
+            // 延遲後進入下一關
+            setTimeout(() => {
+                nextLevel();
+            }, 1500);
+        }
+
+        function showFloatingScore(earned) {
+            const floating = document.createElement('div');
+            floating.innerHTML = `<span class="text-xl md:text-2xl mr-1">+</span>${earned}`;
+            floating.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-6xl font-black text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.8)] z-50 pointer-events-none animate-float-up';
+            document.querySelector('main').appendChild(floating);
+
+            setTimeout(() => {
+                floating.remove();
+            }, 1200);
+        }
+
+        function alertCustom(msg) {
+            const toast = document.getElementById('game-toast');
+            toast.innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 3000);
+        }
+
+        // --- Google Apps Script 網址設定區 ---
+        // 請將下方引號內的網址，替換成你部署 Google Apps Script 後獲得的 Web App URL
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw45ncYRllOKxPWa9fqKnbaWI2OXKAeg0WeptG6Wv9WjWkTjf7bOIX7W0Zc7XcE5vNX/exec"; 
+
+        function submitScore() {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim() || (currentLang === 'zh' ? '無名維修員' : 'Unknown Fixer');
+            const btn = document.getElementById('btn-submit-score');
+            
+            btn.innerText = i18n[currentLang].btnSubmitting;
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+
+            // 背景同步發送至 Google 試算表 (使用 no-cors 避免跨域阻擋)
+            if (GAS_WEB_APP_URL !== "請在此填入您的_GAS_網址" && GAS_WEB_APP_URL !== "") {
+                const formData = new URLSearchParams();
+                formData.append('name', name);
+                formData.append('score', score);
+                formData.append('level', level);
+
+                fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors' // 單向送出不求回傳，最穩定
+                }).then(() => {
+                    console.log("後台資料已發送至試算表");
+                    alertCustom(i18n[currentLang].toastSuccess);
+                    btn.innerText = i18n[currentLang].btnSubmitted;
+                }).catch(e => {
+                    console.error("GAS 同步失敗:", e);
+                    alertCustom(i18n[currentLang].toastFail);
+                    btn.innerText = i18n[currentLang].submitBtn;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75');
+                });
+            } else {
+                alertCustom(i18n[currentLang].toastTest);
+                btn.innerText = i18n[currentLang].btnTestDone;
+            }
+        }
+
+        // 初始化遊戲與預設語言
+        applyLanguage();
+        initGame();
+
+    </script>
+</body>
+</html>
