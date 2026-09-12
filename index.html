@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="NTUT AIoTFixer - 電路維修員。體驗電路旋轉與修復邏輯，挑戰最高連擊與分數！">
     <title>Circuit Fixer - NTUT AIoTFixer</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%230ea5e9' d='M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z'/%3E%3C/svg%3E" type="image/svg+xml">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -63,7 +65,7 @@
             </div>
             <div>
                 <div class="flex items-center gap-2">
-                    <h1 class="font-bold text-sm md:text-lg text-cyan-400 tracking-wider neon-text leading-tight" data-i18n="headerTitle">短路搶修</h1>
+                    <h1 class="font-bold text-sm md:text-lg text-cyan-400 tracking-wider neon-text leading-tight" data-i18n="headerTitle">電路維修員</h1>
                     <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-800 text-slate-300 hover:text-white px-2 py-0.5 rounded text-[10px] md:text-xs border border-slate-700 transition-colors">EN</button>
                 </div>
                 <div class="text-[10px] md:text-xs text-slate-400">NTUT AIoTFixer</div>
@@ -155,6 +157,11 @@
         </div>
 
     </main>
+    
+    <!-- 版權宣告 (Copyright Footer) -->
+    <div class="fixed bottom-1 right-2 text-[8px] md:text-[10px] text-slate-500/50 font-mono pointer-events-none z-[100] select-none">
+        © <span id="current-year">2026</span> NTUT AIoTFixer. All Rights Reserved.
+    </div>
 
     <script>
         const DIR_TOP = 0;
@@ -641,8 +648,8 @@
             
             icon.className = `fa-solid ${currentAppliance.icon} text-emerald-400 text-2xl md:text-4xl mb-1 md:mb-2 animate-bounce`;
             
-            // 針對風扇和果汁機，使用旋轉特效代替彈跳
-            if(currentAppliance.icon === 'fa-fan' || currentAppliance.icon === 'fa-blender') {
+            // 針對風扇，使用旋轉特效代替彈跳
+            if(currentAppliance.icon === 'fa-fan') {
                 icon.classList.add('animate-spin');
                 icon.classList.remove('animate-bounce');
             }
@@ -753,6 +760,9 @@
         // 初始化遊戲與預設語言
         applyLanguage();
         initGame();
+
+        // 設定動態版權年份
+        document.getElementById('current-year').textContent = new Date().getFullYear();
 
     </script>
 </body>
