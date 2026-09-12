@@ -241,6 +241,7 @@
         const i18n = {
             zh: {
                 headerTitle: "電路維修員",
+                headerLeaderboard: "排行榜",
                 startTitle: "電路維修員",
                 startDesc: "點擊方塊旋轉電線，將左側電源接通至右側家電。<br>隨著關卡推進，電路板將擴展至最大 9x9！",
                 startBtn: "開始搶修",
@@ -256,7 +257,7 @@
                 btnSubmitting: "上傳中...",
                 btnSubmitted: "已上傳",
                 btnTestDone: "測試完成",
-                leaderboardTitle: "即時排行榜 (Top 100)",
+                modalLeaderboardTitle: "即時排行榜 (Top 100)",
                 thRank: "排名",
                 thFixer: "維修員",
                 thScore: "總得分",
@@ -267,6 +268,7 @@
             },
             en: {
                 headerTitle: "Circuit Fixer",
+                headerLeaderboard: "Leaderboard",
                 startTitle: "Circuit Fixer",
                 startDesc: "Tap the tiles to rotate the wires and connect power to the appliance.<br>The board expands up to 9x9 as you progress!",
                 startBtn: "START REPAIR",
@@ -282,7 +284,7 @@
                 btnSubmitting: "Submitting...",
                 btnSubmitted: "Submitted",
                 btnTestDone: "Test Done",
-                leaderboardTitle: "Live Leaderboard (Top 100)",
+                modalLeaderboardTitle: "Live Leaderboard (Top 100)",
                 thRank: "Rank",
                 thFixer: "Fixer",
                 thScore: "Total Score",
@@ -784,6 +786,14 @@
 
         function closeLeaderboardModal() {
             document.getElementById('overlay-leaderboard').classList.add('hidden');
+        }
+
+        // 安全跳脫字元，防止 XSS 注入攻擊與渲染錯誤
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
         }
 
         function fetchModalLeaderboard() {
