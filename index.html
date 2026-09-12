@@ -67,9 +67,8 @@
                 <div class="flex items-center gap-2">
                     <h1 class="font-bold text-sm md:text-lg text-cyan-400 tracking-wider neon-text leading-tight" data-i18n="headerTitle">電路維修員</h1>
                     <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-800 text-slate-300 hover:text-white px-2 py-0.5 rounded text-[10px] md:text-xs border border-slate-700 transition-colors">EN</button>
-                    <!-- 新增：查看排行榜按鈕 -->
                     <button onclick="openLeaderboardModal()" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 px-2.5 py-0.5 rounded text-[10px] md:text-xs border border-amber-500/40 transition-colors flex items-center gap-1">
-                        <i class="fa-solid fa-trophy"></i> 排行榜
+                        <i class="fa-solid fa-trophy"></i> <span data-i18n="headerLeaderboard">排行榜</span>
                     </button>
                 </div>
                 <div class="text-[10px] md:text-xs text-slate-400">NTUT AIoTFixer</div>
@@ -160,44 +159,40 @@
             </button>
         </div>
         
-        <!-- 新增：遊戲內嵌排行榜彈出視窗 (Modal) -->
+        <!-- 遊戲內嵌排行榜彈出視窗 (Modal) -->
         <div id="overlay-leaderboard" class="absolute inset-0 bg-cyber-dark/95 backdrop-blur-md flex flex-col items-center justify-center z-50 hidden p-4">
             <div class="w-full max-w-2xl bg-cyber-panel border border-slate-700 rounded-2xl flex flex-col h-[80vh] shadow-2xl overflow-hidden">
-                <!-- Modal Header -->
                 <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-trophy text-amber-400"></i>
-                        <h3 class="font-bold text-lg text-white">即時榮譽排行榜 (Top 100)</h3>
+                        <h3 class="font-bold text-lg text-white" data-i18n="modalLeaderboardTitle">即時排行榜 (Top 100)</h3>
                     </div>
                     <button onclick="closeLeaderboardModal()" class="text-slate-400 hover:text-white p-2">
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
-                <!-- Modal Body: Table List -->
                 <div class="flex-grow overflow-y-auto custom-scrollbar p-4">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-xs text-slate-500 border-b border-slate-800 uppercase">
-                                <th class="py-2 px-3">排名</th>
-                                <th class="py-2 px-3">維修員</th>
-                                <th class="py-2 px-3 text-right">總得分</th>
-                                <th class="py-2 px-3 text-center">關卡</th>
+                                <th class="py-2 px-3" data-i18n="thRank">排名</th>
+                                <th class="py-2 px-3" data-i18n="thFixer">維修員</th>
+                                <th class="py-2 px-3 text-right" data-i18n="thScore">總得分</th>
+                                <th class="py-2 px-3 text-center" data-i18n="thLevel">關卡</th>
                             </tr>
                         </thead>
                         <tbody id="modal-leaderboard-body">
-                            <tr><td colspan="4" class="text-center py-8 text-slate-500">載入中...</td></tr>
+                            <tr><td colspan="4" class="text-center py-8 text-slate-500" data-i18n="loading">載入中...</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <!-- Modal Footer -->
                 <div class="p-3 border-t border-slate-800 bg-slate-950 text-center">
                     <button onclick="fetchModalLeaderboard()" class="text-cyan-400 hover:text-white text-xs flex items-center gap-1 mx-auto">
-                        <i class="fa-solid fa-rotate-right"></i> 重新整理
+                        <i class="fa-solid fa-rotate-right"></i> <span data-i18n="refresh">重新整理</span>
                     </button>
                 </div>
             </div>
         </div>
-
     </main>
     
     <!-- 版權宣告 (Copyright Footer) -->
@@ -260,7 +255,15 @@
                 toastTest: "尚未設定 GAS 網址，已完成本機測試",
                 btnSubmitting: "上傳中...",
                 btnSubmitted: "已上傳",
-                btnTestDone: "測試完成"
+                btnTestDone: "測試完成",
+                leaderboardTitle: "即時榮譽排行榜 (Top 100)",
+                thRank: "排名",
+                thFixer: "維修員",
+                thScore: "總得分",
+                thLevel: "關卡",
+                loading: "載入中...",
+                connectError: "無法連線至雲端排行榜",
+                refresh: "重新整理"
             },
             en: {
                 headerTitle: "Circuit Fixer",
@@ -278,7 +281,15 @@
                 toastTest: "GAS URL not set, test mode only.",
                 btnSubmitting: "Submitting...",
                 btnSubmitted: "Submitted",
-                btnTestDone: "Test Done"
+                btnTestDone: "Test Done",
+                leaderboardTitle: "Live Leaderboard (Top 100)",
+                thRank: "Rank",
+                thFixer: "Fixer",
+                thScore: "Total Score",
+                thLevel: "Level",
+                loading: "Loading...",
+                connectError: "Unable to connect to leaderboard",
+                refresh: "Refresh"
             }
         };
 
@@ -287,10 +298,14 @@
             document.getElementById('langBtn').innerText = currentLang === 'zh' ? 'EN' : 'ZH';
             document.title = currentLang === 'zh' ? "電路維修員 - NTUT AIoTFixer" : "Circuit Fixer - NTUT AIoTFixer";
             applyLanguage();
+            // 如果排行榜視窗正開著，順便重新渲染更新語系
+            const modal = document.getElementById('overlay-leaderboard');
+            if (modal && !modal.classList.contains('hidden')) {
+                fetchModalLeaderboard();
+            }
         }
 
         function applyLanguage() {
-            // 切換一般文字內容
             const elements = document.querySelectorAll('[data-i18n]');
             elements.forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -299,7 +314,6 @@
                 }
             });
 
-            // 切換輸入框提示文字 (Placeholder)
             const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
             placeholders.forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
@@ -308,7 +322,6 @@
                 }
             });
             
-            // 確保送出按鈕的狀態文字正確
             const submitBtn = document.getElementById('btn-submit-score');
             if (submitBtn && !submitBtn.disabled) {
                 submitBtn.innerText = i18n[currentLang].submitBtn;
@@ -775,7 +788,7 @@
 
         function fetchModalLeaderboard() {
             const tbody = document.getElementById('modal-leaderboard-body');
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 animate-pulse">連線載入中...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 animate-pulse">${i18n[currentLang].loading}</td></tr>`;
 
             if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "請在此填入您的_GAS_網址") {
                 fetch(GAS_WEB_APP_URL)
@@ -785,10 +798,9 @@
                     })
                     .catch(error => {
                         console.error("抓取排行榜失敗:", error);
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500">無法連線至雲端排行榜</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500">${i18n[currentLang].connectError}</td></tr>`;
                     });
             } else {
-                // 本機測試假資料
                 const mockData = [
                     { name: '電機謝同學', score: 15400, level: 6 },
                     { name: '資工小神童', score: 12300, level: 5 },
