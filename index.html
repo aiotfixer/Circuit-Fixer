@@ -213,7 +213,7 @@
                 namePlaceholder: "輸入學號",
                 submitBtn: "送出成績",
                 retryBtn: "重新挑戰",
-                toastSuccess: "成績已發送至試算表！",
+                toastSuccess: "成績已上傳至排行榜！",
                 toastFail: "網路連線不穩，成績上傳失敗",
                 toastTest: "尚未設定 GAS 網址，已完成本機測試",
                 btnSubmitting: "上傳中...",
@@ -231,7 +231,7 @@
                 namePlaceholder: "Enter Student ID",
                 submitBtn: "Submit Score",
                 retryBtn: "Try Again",
-                toastSuccess: "Score sent to spreadsheet!",
+                toastSuccess: "The score has been uploaded to the leaderboard!",
                 toastFail: "Connection unstable, upload failed.",
                 toastTest: "GAS URL not set, test mode only.",
                 btnSubmitting: "Submitting...",
@@ -741,7 +741,7 @@
                     body: formData,
                     mode: 'no-cors' // 單向送出不求回傳，最穩定
                 }).then(() => {
-                    console.log("後台資料已發送至試算表");
+                    console.log("成績已上傳");
                     alertCustom(i18n[currentLang].toastSuccess);
                     btn.innerText = i18n[currentLang].btnSubmitted;
                 }).catch(e => {
