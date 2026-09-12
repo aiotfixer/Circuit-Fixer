@@ -129,7 +129,7 @@
         <!-- 開始畫面 Overlay -->
         <div id="overlay-start" class="absolute inset-0 bg-cyber-dark/90 backdrop-blur-sm flex flex-col items-center justify-center z-50">
             <i class="fa-solid fa-triangle-exclamation text-rose-500 text-6xl mb-4 neon-text"></i>
-            <h2 class="text-3xl md:text-5xl font-bold text-white mb-2 tracking-tight" data-i18n="startTitle">電器短路搶修</h2>
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-2 tracking-tight" data-i18n="startTitle">電路維修員</h2>
             <p class="text-slate-400 text-sm md:text-base mb-8 text-center max-w-sm px-4" data-i18n="startDesc">點擊方塊旋轉電線，將左側電源接通至右側家電。<br>隨著關卡推進，電路板將擴展至最大 9x9！</p>
             <button onclick="startGame()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-10 rounded-full text-lg shadow-[0_0_15px_rgba(14,165,233,0.5)] transition-all transform hover:scale-105" data-i18n="startBtn">
                 開始搶修
@@ -148,7 +148,7 @@
             </div>
 
             <div class="w-64 mb-8 space-y-3">
-                <input type="text" id="playerName" placeholder="輸入姓名 (如: 電機謝同學)" data-i18n-placeholder="namePlaceholder" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-center focus:outline-none focus:border-cyan-500 transition-colors" maxlength="12">
+                <input type="text" id="playerName" placeholder="輸入學號" data-i18n-placeholder="namePlaceholder" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white text-center focus:outline-none focus:border-cyan-500 transition-colors" maxlength="12">
                 <button id="btn-submit-score" onclick="submitScore()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 rounded-lg text-sm shadow-[0_0_15px_rgba(217,119,6,0.5)] transition-all" data-i18n="submitBtn">
                     送出成績
                 </button>
@@ -256,7 +256,7 @@
                 btnSubmitting: "上傳中...",
                 btnSubmitted: "已上傳",
                 btnTestDone: "測試完成",
-                leaderboardTitle: "即時榮譽排行榜 (Top 100)",
+                leaderboardTitle: "即時排行榜 (Top 100)",
                 thRank: "排名",
                 thFixer: "維修員",
                 thScore: "總得分",
