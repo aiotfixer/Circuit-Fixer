@@ -788,7 +788,7 @@
             }
             
             document.getElementById('overlay-leaderboard').classList.remove('hidden');
-            fetchModalLeaderboard();
+            fetchModalLeaderboard(true); // 開啟時觸發更新
         }
 
         function closeLeaderboardModal() {
@@ -809,19 +809,47 @@
             );
         }
 
-        function fetchModalLeaderboard() {
-            const tbody = document.getElementById('modal-leaderboard-body');
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 animate-pulse">${i18n[currentLang].loading}</td></tr>`;
+        // --- 排行榜優化：快取與背景抓取機制 ---
+        let cachedLeaderboardData = null;
+        let isFetchingLeaderboard = false;
 
+        function fetchModalLeaderboard(showLoadingUI = false) {
+            const tbody = document.getElementById('modal-leaderboard-body');
+            
+            // 1. 如果已經有快取資料，瞬間渲染 (極致流暢體驗)
+            if (cachedLeaderboardData) {
+                renderModalBoard(cachedLeaderboardData);
+            } else if (showLoadingUI) {
+                // 只有在完全沒有快取時，才顯示載入中
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 animate-pulse">${i18n[currentLang].loading}</td></tr>`;
+            }
+
+            // 避免重複同時發送請求
+            if (isFetchingLeaderboard) return;
+            isFetchingLeaderboard = true;
+
+            // 2. 背景向 GAS 請求最新資料
             if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "請在此填入您的_GAS_網址") {
                 fetch(GAS_WEB_APP_URL)
                     .then(response => response.json())
                     .then(records => {
-                        renderModalBoard(records);
+                        cachedLeaderboardData = records; // 更新快取
+                        
+                        // 如果排行榜視窗正開著，無縫更新最新資料
+                        const modal = document.getElementById('overlay-leaderboard');
+                        if (modal && !modal.classList.contains('hidden')) {
+                            renderModalBoard(records);
+                        }
                     })
                     .catch(error => {
                         console.error("抓取排行榜失敗:", error);
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500">${i18n[currentLang].connectError}</td></tr>`;
+                        // 只有在沒有快取時才顯示錯誤訊息
+                        if (!cachedLeaderboardData && showLoadingUI) {
+                            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500">${i18n[currentLang].connectError}</td></tr>`;
+                        }
+                    })
+                    .finally(() => {
+                        isFetchingLeaderboard = false;
                     });
             } else {
                 const mockData = [
@@ -829,7 +857,9 @@
                     { name: '資工小神童', score: 12300, level: 5 },
                     { name: '電子小王', score: 9800, level: 4 }
                 ];
+                cachedLeaderboardData = mockData;
                 renderModalBoard(mockData);
+                isFetchingLeaderboard = false;
             }
         }
 
@@ -904,6 +934,11 @@
 
         // 設定動態版權年份
         document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // 遊戲載入完畢後，偷偷在背景預先抓取一次排行榜資料 (Pre-fetching)
+        setTimeout(() => {
+            fetchModalLeaderboard(false);
+        }, 1000);
 
     </script>
 </body>
