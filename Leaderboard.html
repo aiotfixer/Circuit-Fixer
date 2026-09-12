@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NTUT AIoTFixer 即時排行榜。查看即時積分與排名。">
+    <title>Circuit Fixer Leaderboard - NTUT AIoTFixer</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%230ea5e9' d='M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z'/%3E%3C/svg%3E" type="image/svg+xml">
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入科技感字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { teal: '#14b8a6' }
+                    },
+                    fontFamily: { mono: ['Share Tech Mono', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans overflow-x-hidden selection:bg-brand-teal/30">
+    <div class="max-w-5xl mx-auto">
+        
+        <!-- 頂部標題與狀態列 -->
+        <header class="mb-8 flex justify-between items-end border-b border-slate-800 pb-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-3xl md:text-5xl font-black text-brand-teal tracking-tight" data-i18n="title">即時排行榜</h1>
+                    <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-800 text-slate-300 hover:text-white px-2 py-1 rounded text-xs border border-slate-700 transition-colors">EN</button>
+                </div>
+                <p class="text-slate-400 mt-2 text-sm md:text-base" data-i18n="subtitle">🏆 綜合排名</p>
+            </div>
+            <div class="text-right">
+                <div class="text-xs text-slate-500 mb-1 flex items-center gap-2 justify-end">
+                    <span id="syncStatus" class="w-2 h-2 bg-brand-teal rounded-full"></span>
+                    <span data-i18n="syncText">即時同步中 (每 1 秒更新)</span>
+                </div>
+                <div id="lastUpdate" class="text-brand-teal text-lg font-bold">00:00:00</div>
+            </div>
+        </header>
+
+        <!-- 排行榜表格 -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-950 border-b border-slate-800">
+                        <th class="py-4 px-6 font-bold text-slate-300 w-24" data-i18n="thRank">排名</th>
+                        <th class="py-4 px-6 font-bold text-slate-300" data-i18n="thName">維修員</th>
+                        <th class="py-4 px-6 font-bold text-slate-300 text-right" data-i18n="thScore">總得分</th>
+                        <th class="py-4 px-6 font-bold text-slate-300 text-center" data-i18n="thLevel">抵達關卡</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- 資料由 JavaScript 動態生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="text-center mt-8 text-slate-600 text-xs font-mono">
+            © <span id="current-year">2026</span> NTUT AIoTFixer. All Rights Reserved.
+        </div>
+    </div>
+
+    <script>
+        let lastData = []; 
+        let currentLang = 'zh';
+
+        // 雙語字典
+        const i18n = {
+            zh: {
+                title: "即時排行榜",
+                subtitle: "🏆 綜合排名",
+                thRank: "排名",
+                thName: "維修員",
+                thScore: "總得分",
+                thLevel: "抵達關卡",
+                syncText: "即時同步中 (每 1 秒更新)",
+                noRecord: "尚無維修紀錄，趕快成為第一位挑戰者吧！"
+            },
+            en: {
+                title: "Live Leaderboard",
+                subtitle: "🏆 Overall Performance",
+                thRank: "Rank",
+                thName: "Fixer",
+                thScore: "Total Score",
+                thLevel: "Level Reached",
+                syncText: "Live Syncing (Updates every 1s)",
+                noRecord: "No records yet. Be the first challenger!"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            document.getElementById('langBtn').innerText = currentLang === 'zh' ? 'EN' : 'ZH';
+            applyLanguage();
+            renderBoard(lastData);
+        }
+
+        function applyLanguage() {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    el.innerText = i18n[currentLang][key];
+                }
+            });
+        }
+
+        // ==========================================
+        // 請將下方網址替換為您部署好的 GAS Web App URL
+        // ==========================================
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyniTBbW9ySb-UDCFFBVfeM9CE_PzlGu4TiarBnXwqTPH6SYjTsUSVpd-siFmq2iX3-/exec";
+
+        function fetchLeaderboard() {
+            // 1. 如果是在 Google Apps Script 內嵌環境中
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run
+                    .withSuccessHandler(function(records) {
+                        lastData = records;
+                        renderBoard(records);
+                        updateTime();
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error("GAS 抓取失敗:", error);
+                    })
+                    .getLeaderboardData();
+            } 
+            // 2. 如果是部署在外部獨立伺服器或 GitHub Pages，透過 fetch 呼叫 GAS
+            else if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "請在此填入您的_GAS_網址") {
+                // 由於 GAS 預設的 GET 請求會處理跨域，我們直接透過 fetch 抓取資料
+                fetch(GAS_WEB_APP_URL)
+                    .then(response => response.json())
+                    .then(records => {
+                        lastData = records;
+                        renderBoard(records);
+                        updateTime();
+                    })
+                    .catch(error => {
+                        console.error("API 網路連線錯誤:", error);
+                    });
+            } 
+            // 3. 沒有設定網址時的本機測試假資料
+            else {
+                const mockData = [
+                    { name: '114310999', score: 15400, level: 6, timestamp: Date.now() - 10000 },
+                    { name: '114310888', score: 12300, level: 5, timestamp: Date.now() - 20000 },
+                    { name: '114310777', score: 9800, level: 4, timestamp: Date.now() - 30000 }
+                ];
+                lastData = mockData;
+                renderBoard(mockData);
+                updateTime();
+            }
+        }
+
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
+            );
+        }
+
+        function renderBoard(records) {
+            const tbody = document.getElementById('leaderboard-body');
+            
+            // 1. 記錄現有列的絕對位置 (FLIP 動畫：First)
+            const previousPositions = {};
+            const currentRows = tbody.querySelectorAll('tr[data-key]');
+            currentRows.forEach(row => {
+                previousPositions[row.getAttribute('data-key')] = row.getBoundingClientRect().top;
+            });
+
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 font-bold">${i18n[currentLang].noRecord}</td></tr>`;
+                return;
+            }
+
+            records.forEach((record, index) => {
+                const tr = document.createElement('tr');
+                const key = `${record.name}_${record.score}_${record.level}_${record.timestamp || index}`; 
+                tr.setAttribute('data-key', key);
+                tr.className = "border-b border-slate-800/50 bg-slate-900 relative transition-colors";
+
+                let rankHtml = `<span class="text-slate-400 font-mono">${index + 1}</span>`;
+                let nameClass = "text-slate-200";
+                
+                if (index === 0) {
+                    rankHtml = `<div class="bg-amber-500 text-slate-900 w-8 h-8 rounded-full flex items-center justify-center font-black shadow-[0_0_10px_rgba(245,158,11,0.5)]">1</div>`;
+                    nameClass = "text-amber-400 font-bold text-lg";
+                } else if (index === 1) {
+                    rankHtml = `<div class="bg-slate-300 text-slate-900 w-8 h-8 rounded-full flex items-center justify-center font-black shadow-[0_0_10px_rgba(203,213,225,0.5)]">2</div>`;
+                    nameClass = "text-slate-200 font-bold text-lg";
+                } else if (index === 2) {
+                    rankHtml = `<div class="bg-amber-700 text-slate-100 w-8 h-8 rounded-full flex items-center justify-center font-black shadow-[0_0_10px_rgba(180,83,9,0.5)]">3</div>`;
+                    nameClass = "text-amber-600 font-bold text-lg";
+                }
+
+                tr.innerHTML = `
+                    <td class="py-4 px-6">${rankHtml}</td>
+                    <td class="py-4 px-6 ${nameClass}">${escapeHTML(record.name)}</td>
+                    <td class="py-4 px-6 text-right font-mono text-xl font-bold text-brand-teal">${record.score.toLocaleString()}</td>
+                    <td class="py-4 px-6 text-center">
+                        <span class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-sm font-mono border border-slate-700">Lv.${record.level}</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 2. FLIP 動畫計算 (Last, Invert, Play)
+            const newRows = tbody.querySelectorAll('tr[data-key]');
+            const tableRect = tbody.getBoundingClientRect();
+            
+            newRows.forEach(row => {
+                const key = row.getAttribute('data-key');
+                const newTop = row.getBoundingClientRect().top;
+                
+                let oldTop = previousPositions[key];
+                let isNew = false;
+                
+                if (oldTop === undefined) {
+                    oldTop = tableRect.bottom + 50;
+                    isNew = true;
+                    row.style.zIndex = "20";
+                } else {
+                    row.style.zIndex = "10";
+                }
+                
+                const deltaY = oldTop - newTop;
+                row.style.transform = `translateY(${deltaY}px)`;
+                row.style.transition = 'none';
+                if (isNew) {
+                    row.style.opacity = '0';
+                }
+            });
+
+            document.body.offsetHeight; // Reflow
+
+            newRows.forEach(row => {
+                row.style.transform = 'translateY(0)';
+                row.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease-out';
+                row.style.opacity = '1';
+            });
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const format = (num) => num.toString().padStart(2, '0');
+            const timeStr = `${format(now.getHours())}:${format(now.getMinutes())}:${format(now.getSeconds())}`;
+            document.getElementById('lastUpdate').innerText = timeStr;
+        }
+
+        // 初始化
+        applyLanguage();
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // 啟動排程：每 1 秒自動抓取最新資料
+        fetchLeaderboard();
+        setInterval(fetchLeaderboard, 1000);
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
