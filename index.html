@@ -235,6 +235,8 @@
         let timerInterval;
         let isPlaying = false;
         let isAnimating = false;
+        
+        let isPausedByModal = false; // 新增：記錄是否因為打開排行榜而暫停
 
         // --- 翻譯字典 (i18n) ---
         let currentLang = 'zh';
@@ -779,13 +781,24 @@
         
         // --- 新增：排行榜彈出視窗控制函數 ---
         function openLeaderboardModal() {
-            // 如果遊戲正在進行中，可以選擇暫停計時（選填）
+            // 如果遊戲正在進行中，暫停計時
+            if (isPlaying) {
+                isPlaying = false;
+                isPausedByModal = true;
+            }
+            
             document.getElementById('overlay-leaderboard').classList.remove('hidden');
             fetchModalLeaderboard();
         }
 
         function closeLeaderboardModal() {
             document.getElementById('overlay-leaderboard').classList.add('hidden');
+            
+            // 如果剛才是因為看排行榜而暫停的，關閉時恢復計時
+            if (isPausedByModal) {
+                isPlaying = true;
+                isPausedByModal = false;
+            }
         }
 
         // 安全跳脫字元，防止 XSS 注入攻擊與渲染錯誤
