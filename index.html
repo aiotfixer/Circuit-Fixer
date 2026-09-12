@@ -67,6 +67,10 @@
                 <div class="flex items-center gap-2">
                     <h1 class="font-bold text-sm md:text-lg text-cyan-400 tracking-wider neon-text leading-tight" data-i18n="headerTitle">電路維修員</h1>
                     <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-800 text-slate-300 hover:text-white px-2 py-0.5 rounded text-[10px] md:text-xs border border-slate-700 transition-colors">EN</button>
+                    <!-- 新增：查看排行榜按鈕 -->
+                    <button onclick="openLeaderboardModal()" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 px-2.5 py-0.5 rounded text-[10px] md:text-xs border border-amber-500/40 transition-colors flex items-center gap-1">
+                        <i class="fa-solid fa-trophy"></i> 排行榜
+                    </button>
                 </div>
                 <div class="text-[10px] md:text-xs text-slate-400">NTUT AIoTFixer</div>
             </div>
@@ -154,6 +158,44 @@
             <button onclick="initGame()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-10 rounded-full text-lg shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all transform hover:scale-105" data-i18n="retryBtn">
                 重新挑戰
             </button>
+        </div>
+        
+        <!-- 新增：遊戲內嵌排行榜彈出視窗 (Modal) -->
+        <div id="overlay-leaderboard" class="absolute inset-0 bg-cyber-dark/95 backdrop-blur-md flex flex-col items-center justify-center z-50 hidden p-4">
+            <div class="w-full max-w-2xl bg-cyber-panel border border-slate-700 rounded-2xl flex flex-col h-[80vh] shadow-2xl overflow-hidden">
+                <!-- Modal Header -->
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i>
+                        <h3 class="font-bold text-lg text-white">即時榮譽排行榜 (Top 100)</h3>
+                    </div>
+                    <button onclick="closeLeaderboardModal()" class="text-slate-400 hover:text-white p-2">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+                <!-- Modal Body: Table List -->
+                <div class="flex-grow overflow-y-auto custom-scrollbar p-4">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs text-slate-500 border-b border-slate-800 uppercase">
+                                <th class="py-2 px-3">排名</th>
+                                <th class="py-2 px-3">維修員</th>
+                                <th class="py-2 px-3 text-right">總得分</th>
+                                <th class="py-2 px-3 text-center">關卡</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-leaderboard-body">
+                            <tr><td colspan="4" class="text-center py-8 text-slate-500">載入中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Modal Footer -->
+                <div class="p-3 border-t border-slate-800 bg-slate-950 text-center">
+                    <button onclick="fetchModalLeaderboard()" class="text-cyan-400 hover:text-white text-xs flex items-center gap-1 mx-auto">
+                        <i class="fa-solid fa-rotate-right"></i> 重新整理
+                    </button>
+                </div>
+            </div>
         </div>
 
     </main>
@@ -719,6 +761,70 @@
         // --- Google Apps Script 網址設定區 ---
         // 請將下方引號內的網址，替換成你部署 Google Apps Script 後獲得的 Web App URL
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyniTBbW9ySb-UDCFFBVfeM9CE_PzlGu4TiarBnXwqTPH6SYjTsUSVpd-siFmq2iX3-/exec"; 
+        
+        // --- 新增：排行榜彈出視窗控制函數 ---
+        function openLeaderboardModal() {
+            // 如果遊戲正在進行中，可以選擇暫停計時（選填）
+            document.getElementById('overlay-leaderboard').classList.remove('hidden');
+            fetchModalLeaderboard();
+        }
+
+        function closeLeaderboardModal() {
+            document.getElementById('overlay-leaderboard').classList.add('hidden');
+        }
+
+        function fetchModalLeaderboard() {
+            const tbody = document.getElementById('modal-leaderboard-body');
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 animate-pulse">連線載入中...</td></tr>`;
+
+            if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "請在此填入您的_GAS_網址") {
+                fetch(GAS_WEB_APP_URL)
+                    .then(response => response.json())
+                    .then(records => {
+                        renderModalBoard(records);
+                    })
+                    .catch(error => {
+                        console.error("抓取排行榜失敗:", error);
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500">無法連線至雲端排行榜</td></tr>`;
+                    });
+            } else {
+                // 本機測試假資料
+                const mockData = [
+                    { name: '電機謝同學', score: 15400, level: 6 },
+                    { name: '資工小神童', score: 12300, level: 5 },
+                    { name: '電子小王', score: 9800, level: 4 }
+                ];
+                renderModalBoard(mockData);
+            }
+        }
+
+        function renderModalBoard(records) {
+            const tbody = document.getElementById('modal-leaderboard-body');
+            tbody.innerHTML = '';
+
+            if (!records || records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500">尚無維修紀錄</td></tr>`;
+                return;
+            }
+
+            records.forEach((record, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-800/50 hover:bg-slate-900/50";
+                
+                let rankClass = "text-slate-400";
+                if (index === 0) rankClass = "text-amber-400 font-bold";
+                else if (index === 1) rankClass = "text-slate-200 font-bold";
+                else if (index === 2) rankClass = "text-amber-600 font-bold";
+
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-mono ${rankClass}">#${index + 1}</td>
+                    <td class="py-3 px-3 text-slate-200">${escapeHTML(record.name)}</td>
+                    <td class="py-3 px-3 text-right font-mono text-cyan-400 font-bold">${record.score.toLocaleString()}</td>
+                    <td class="py-3 px-3 text-center font-mono"><span class="bg-slate-800 px-2 py-0.5 rounded text-xs text-slate-300">Lv.${record.level}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
         function submitScore() {
             const nameInput = document.getElementById('playerName');
