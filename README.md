@@ -1,7 +1,7 @@
 # Circuit Fixer 電路維修員
-歡迎來到 **北科智慧家電維修社 (NTUT AIoTFixer)** 的互動遊戲：「**電路維修員 (Circuit Fixer)**」 專案庫！
+歡迎來到由 **北科智慧家電維修社 (NTUT AIoTFixer)** 開發的互動遊戲：「**電路維修員 (Circuit Fixer)**」 專案庫！
 
-本遊戲專案旨在透過無門檻的網頁解謎互動，讓新生快速體驗電路導通的邏輯與搶修的刺激感，進而吸引對硬體維修與 AIoT 科技有興趣的同學加入社團。
+本遊戲專案旨在透過無門檻的網頁解謎互動，讓新生快速體驗電路導通的邏輯與搶修的刺激感，在遊戲中玩家可挑戰最高分，並將成績即時同步至排行榜，進而吸引對硬體維修與 AIoT 科技有興趣的同學加入社團。
 
 ### 🚀 立即遊玩 (Play Now)
 👉 [Circuit Fixer](https://aiotfixer.github.io/Circuit-Fixer/)
@@ -12,6 +12,7 @@
   - 動態難度擴張：隨著過關次數增加，電路板網格會從 5x5 擴大至 7x7，最終達到 9x9 的極限挑戰。
   - 免安裝跨平台：純前端單檔 (Single-file) 開發，支援手機、平板觸控，以及電腦滑鼠點擊，開啟網頁即可遊玩。
   - 中英雙語 (i18n)：內建即時語言切換功能，友善外籍新生體驗。
+  - 即時排行榜：內建 Top 100 排行榜，透過 GAS 實現跨域無伺服器 (Serverless) 的即時成績同步。
 
 ---
 ### 🎮 遊戲操作與規則 (How to Play)
@@ -32,9 +33,9 @@
 
 ---
 ### 🛠️ 技術堆疊 (Tech Stack)
-  - UI / Styling: Tailwind CSS
+  - UI / Styling: Tailwind CSS (Utility-first CSS framework)
   - Icons: FontAwesome 6
   - Animation: CSS3 Keyframes, Transition, Canvas Confetti
-  - Logic / State: Vanilla JavaScript (ES6)
-  - Database / API: Google Apps Script (GAS) + Google Sheets
-  - 本專案使用 Gemini 開發
+  - Game Logic: Vanilla JavaScript (ES6), DFS Algorithm (保證路徑生成), BFS Algorithm (電流擴散判定)
+  - Backend / API: Google Apps Script (GAS) + Google Sheets (作為 Serverless Database)
+  - 本專案開發過程使用 Gemini 輔助協作。
