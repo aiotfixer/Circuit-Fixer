@@ -58,35 +58,36 @@
     </div>
 
     <!-- 頂部資訊列 -->
-    <header class="flex-none bg-cyber-panel border-b border-cyan-900/50 p-3 md:p-4 flex justify-between items-center z-10 shadow-lg shadow-cyan-900/20 relative">
-        <div class="flex items-center gap-2 md:gap-3">
-            <div class="bg-cyan-500/20 text-cyan-400 p-2 rounded flex items-center justify-center border border-cyan-500/30">
-                <i class="fa-solid fa-bolt text-lg md:text-xl"></i>
+    <header class="flex-none bg-cyber-panel border-b border-cyan-900/50 p-2 md:p-4 flex justify-between items-center z-10 shadow-lg shadow-cyan-900/20 relative gap-1">
+        <div class="flex items-center gap-1.5 md:gap-3 min-w-0 flex-1">
+            <div class="bg-cyan-500/20 text-cyan-400 p-1.5 md:p-2 rounded flex items-center justify-center border border-cyan-500/30 flex-shrink-0">
+                <i class="fa-solid fa-bolt text-base md:text-xl"></i>
             </div>
-            <div>
-                <div class="flex items-center gap-2">
-                    <h1 class="font-bold text-sm md:text-lg text-cyan-400 tracking-wider neon-text leading-tight" data-i18n="headerTitle">電路維修員</h1>
-                    <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-800 text-slate-300 hover:text-white px-2 py-0.5 rounded text-[10px] md:text-xs border border-slate-700 transition-colors">EN</button>
-                    <button onclick="openLeaderboardModal()" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 px-2.5 py-0.5 rounded text-[10px] md:text-xs border border-amber-500/40 transition-colors flex items-center gap-1">
-                        <i class="fa-solid fa-trophy"></i> <span data-i18n="headerLeaderboard">排行榜</span>
-                    </button>
-                </div>
-                <div class="text-[10px] md:text-xs text-slate-400">NTUT AIoTFixer</div>
+            <!-- 左側標題與按鈕區 (使用 flex-nowrap 與 flex-1 確保彈性縮放) -->
+            <div class="flex items-center gap-1.5 md:gap-2 flex-nowrap min-w-0 flex-1">
+                <h1 class="font-bold text-[13px] sm:text-sm md:text-lg text-cyan-400 tracking-wider neon-text leading-tight truncate min-w-[40px]" data-i18n="headerTitle">電路維修員</h1>
+                <button onclick="toggleLanguage()" id="langBtn" class="bg-slate-800 text-slate-300 hover:text-white px-1.5 py-0.5 rounded text-[9px] md:text-xs border border-slate-700 transition-colors flex-shrink-0">EN</button>
+                <button onclick="openLeaderboardModal()" class="bg-amber-600/20 hover:bg-amber-600/40 text-amber-400 px-2 py-0.5 rounded text-[9px] md:text-xs border border-amber-500/40 transition-colors flex items-center gap-1 flex-shrink-0">
+                    <i class="fa-solid fa-trophy"></i> 
+                    <!-- 極小螢幕時隱藏文字，只留獎盃圖示 -->
+                    <span data-i18n="headerLeaderboard" class="hidden min-[375px]:inline">排行榜</span>
+                </button>
             </div>
         </div>
 
-        <div class="flex items-center gap-4 md:gap-8">
+        <div class="flex items-center gap-1.5 sm:gap-3 md:gap-8 flex-shrink-0">
             <div class="text-center">
-                <div class="text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">LEVEL</div>
-                <div class="text-lg md:text-2xl font-bold text-white"><i class="fa-solid fa-layer-group text-slate-500 text-sm sm:hidden mr-1"></i><span id="ui-level">1</span></div>
+                <div class="text-[9px] md:text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">LEVEL</div>
+                <div class="text-base sm:text-lg md:text-2xl font-bold text-white"><i class="fa-solid fa-layer-group text-slate-500 text-[10px] sm:hidden mr-1"></i><span id="ui-level">1</span></div>
             </div>
             <div class="text-center">
-                <div class="text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">SCORE</div>
-                <div class="text-lg md:text-2xl font-bold text-emerald-400"><i class="fa-solid fa-star text-emerald-700 text-sm sm:hidden mr-1"></i><span id="ui-score">0</span></div>
+                <div class="text-[9px] md:text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">SCORE</div>
+                <div class="text-base sm:text-lg md:text-2xl font-bold text-emerald-400"><i class="fa-solid fa-star text-emerald-700 text-[10px] sm:hidden mr-1"></i><span id="ui-score">0</span></div>
             </div>
-            <div class="text-center bg-slate-900 px-3 py-1 rounded border border-slate-700">
-                <div class="text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">TIMER</div>
-                <div id="ui-timer" class="text-lg md:text-2xl font-bold text-rose-400 w-12 md:w-16"><i class="fa-regular fa-clock text-rose-800 text-sm sm:hidden mr-1"></i>60</div>
+            <div class="text-center bg-slate-900 px-1.5 py-1 md:px-3 md:py-1 rounded border border-slate-700">
+                <div class="text-[9px] md:text-[10px] text-slate-500 uppercase tracking-widest hidden sm:block">TIMER</div>
+                <!-- 使用 min-w 與 tabular-nums 防止數字跳動與擠壓 -->
+                <div class="text-base sm:text-lg md:text-2xl font-bold text-rose-400 min-w-[45px] sm:min-w-[55px] md:min-w-[70px] tabular-nums whitespace-nowrap"><i class="fa-regular fa-clock text-rose-800 text-[10px] sm:hidden mr-0.5"></i><span id="ui-timer">60</span></div>
             </div>
         </div>
     </header>
@@ -94,33 +95,31 @@
     <!-- 遊戲主要區域 -->
     <main class="flex-grow relative flex items-center justify-center p-2 md:p-6 overflow-hidden">
         
-        <!-- 核心電路板容器 (將 justify-between 改為 justify-center，讓元素緊靠) -->
-        <div class="w-full max-w-5xl flex items-stretch justify-center gap-1 md:gap-4 h-full max-h-[800px] relative">
+        <!-- 核心電路板容器 -->
+        <div class="w-full max-w-5xl flex items-stretch justify-center gap-1 sm:gap-2 md:gap-4 h-full max-h-[800px] relative">
             
-            <!-- 左側：電源起點 -->
-            <div class="flex flex-col justify-center items-end relative w-16 md:w-28 flex-shrink-0">
-                <!-- 起點粗連接線 -->
-                <div class="absolute left-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-cyan-500 z-0 pointer-events-none"></div>
-                <div class="bg-cyber-panel border-2 border-cyan-800 rounded-lg p-2 text-center w-full relative z-10 shadow-lg flex flex-col items-center">
-                    <i class="fa-solid fa-plug text-cyan-500 text-2xl md:text-4xl mb-1 md:mb-2"></i>
-                    <div class="text-[10px] md:text-xs font-bold text-cyan-400 leading-tight">110V<br>AC</div>
+            <!-- 左側：電源起點 (極致壓縮手機版面) -->
+            <div class="flex flex-col justify-center items-end relative w-12 sm:w-16 md:w-28 flex-shrink-0">
+                <div class="absolute left-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[10px] sm:h-[14px] md:h-[22px] bg-cyan-500 z-0 pointer-events-none"></div>
+                <div class="bg-cyber-panel border sm:border-2 border-cyan-800 rounded-md sm:rounded-lg p-1 sm:p-2 text-center w-full relative z-10 shadow-lg flex flex-col items-center">
+                    <i class="fa-solid fa-plug text-cyan-500 text-xl sm:text-2xl md:text-4xl mb-0.5 md:mb-2"></i>
+                    <div class="text-[8px] sm:text-[10px] md:text-xs font-bold text-cyan-400 leading-tight">110V<br>AC</div>
                 </div>
             </div>
 
-            <!-- 中央：動態解謎網格 (將最大寬度限制移至外層，並取消 flex-grow 避免無限拉伸) -->
-            <div class="w-full max-w-[500px] lg:max-w-[600px] flex items-center justify-center p-1 md:p-2 bg-cyber-panel/50 rounded-xl border border-slate-800 relative z-20 shadow-2xl backdrop-blur-md">
-                <div id="gameBoard" class="grid gap-1 md:gap-1.5 w-full aspect-square relative bg-slate-950 p-2 md:p-3 rounded-lg" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+            <!-- 中央：動態解謎網格 -->
+            <div class="w-full max-w-[450px] sm:max-w-[500px] lg:max-w-[600px] flex items-center justify-center p-1 md:p-2 bg-cyber-panel/50 rounded-xl border border-slate-800 relative z-20 shadow-2xl backdrop-blur-md">
+                <div id="gameBoard" class="grid gap-1 md:gap-1.5 w-full aspect-square relative bg-slate-950 p-1.5 sm:p-2 md:p-3 rounded-lg" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
                     <!-- 方塊將由 JavaScript 動態生成 -->
                 </div>
             </div>
 
             <!-- 右側：待修復家電 -->
-            <div class="flex flex-col justify-center items-start relative w-16 md:w-28 flex-shrink-0">
-                <!-- 終點粗連接線 -->
-                <div id="endLine" class="absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-cyber-line z-0 pointer-events-none transition-colors duration-300"></div>
-                <div id="applianceBox" class="bg-cyber-panel border-2 border-slate-700 rounded-lg p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center shadow-lg">
-                    <i id="applianceIcon" class="fa-solid fa-fan text-slate-500 text-2xl md:text-4xl mb-1 md:mb-2 transition-colors duration-300"></i>
-                    <div id="applianceText" class="text-[10px] md:text-xs font-bold text-slate-500 leading-tight transition-colors duration-300">DC FAN<br>OFF</div>
+            <div class="flex flex-col justify-center items-start relative w-12 sm:w-16 md:w-28 flex-shrink-0">
+                <div id="endLine" class="absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[10px] sm:h-[14px] md:h-[22px] bg-cyber-line z-0 pointer-events-none transition-colors duration-300"></div>
+                <div id="applianceBox" class="bg-cyber-panel border sm:border-2 border-slate-700 rounded-md sm:rounded-lg p-1 sm:p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center shadow-lg">
+                    <i id="applianceIcon" class="fa-solid fa-fan text-slate-500 text-xl sm:text-2xl md:text-4xl mb-0.5 md:mb-2 transition-colors duration-300"></i>
+                    <div id="applianceText" class="text-[8px] sm:text-[10px] md:text-xs font-bold text-slate-500 leading-tight transition-colors duration-300">DC FAN<br>OFF</div>
                 </div>
             </div>
             
@@ -171,31 +170,35 @@
                         <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
-                <div class="flex-grow overflow-y-auto custom-scrollbar p-4">
+                <div class="flex-grow overflow-y-auto custom-scrollbar p-2 md:p-4">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="text-xs text-slate-500 border-b border-slate-800 uppercase">
-                                <th class="py-2 px-3" data-i18n="thRank">排名</th>
-                                <th class="py-2 px-3" data-i18n="thFixer">維修員</th>
-                                <th class="py-2 px-3 text-right" data-i18n="thScore">總得分</th>
-                                <th class="py-2 px-3 text-center" data-i18n="thLevel">關卡</th>
+                            <tr class="text-[10px] md:text-xs text-slate-500 border-b border-slate-800 uppercase">
+                                <th class="py-2 px-2 md:px-3" data-i18n="thRank">排名</th>
+                                <th class="py-2 px-2 md:px-3" data-i18n="thFixer">維修員</th>
+                                <th class="py-2 px-2 md:px-3 text-right" data-i18n="thScore">總得分</th>
+                                <th class="py-2 px-2 md:px-3 text-center" data-i18n="thLevel">關卡</th>
                             </tr>
                         </thead>
                         <tbody id="modal-leaderboard-body">
-                            <tr><td colspan="4" class="text-center py-8 text-slate-500" data-i18n="loading">載入中...</td></tr>
+                            <!-- 資料將由 JS 注入 -->
                         </tbody>
                     </table>
                 </div>
-                <div class="p-3 border-t border-slate-800 bg-slate-950 text-center">
-                    <button onclick="fetchModalLeaderboard()" class="text-cyan-400 hover:text-white text-xs flex items-center gap-1 mx-auto">
-                        <i class="fa-solid fa-rotate-right"></i> <span data-i18n="refresh">重新整理</span>
+                <!-- 底部狀態與重整列 -->
+                <div class="p-3 border-t border-slate-800 bg-slate-950 flex justify-between items-center px-4">
+                    <div class="text-[10px] text-slate-500 flex items-center gap-1.5 font-mono" id="modal-sync-status">
+                        <!-- 同步狀態將由 JS 注入 -->
+                    </div>
+                    <button onclick="fetchModalLeaderboard(true)" id="btn-refresh-board" class="text-cyan-400 hover:text-white text-xs flex items-center gap-1 disabled:opacity-50 transition-colors">
+                        <i id="icon-refresh" class="fa-solid fa-rotate-right"></i> <span data-i18n="refresh">重新整理</span>
                     </button>
                 </div>
             </div>
         </div>
     </main>
     
-    <!-- 版權宣告 (Copyright Footer) -->
+    <!-- 版權宣告 -->
     <div class="fixed bottom-1 right-2 text-[8px] md:text-[10px] text-slate-500/50 font-mono pointer-events-none z-[100] select-none">
         © <span id="current-year">2026</span> NTUT AIoTFixer. All Rights Reserved.
     </div>
@@ -211,7 +214,6 @@
         const TILE_T_SHAPE = 3;  // T型
         const TILE_CROSS = 4;    // 十字型
 
-        // 隨機家電清單 (新增更多電器)
         const appliances = [
             { icon: 'fa-fan', name: 'DC FAN' },
             { icon: 'fa-lightbulb', name: 'LAMP' },
@@ -235,7 +237,6 @@
         let timerInterval;
         let isPlaying = false;
         let isAnimating = false;
-        
         let isPausedByModal = false; // 新增：記錄是否因為打開排行榜而暫停
 
         // --- 翻譯字典 (i18n) ---
@@ -265,14 +266,16 @@
                 thScore: "總得分",
                 thLevel: "關卡",
                 loading: "載入中...",
-                connectError: "無法連線至雲端排行榜",
-                refresh: "重新整理"
+                connectError: "無法連線至排行榜",
+                refresh: "重新整理",
+                syncing: "同步中...",
+                updated: "已更新"
             },
             en: {
                 headerTitle: "Circuit Fixer",
                 headerLeaderboard: "Leaderboard",
                 startTitle: "Circuit Fixer",
-                startDesc: "Tap the tiles to rotate the wires and connect power to the appliance.<br>The board expands up to 9x9 as you progress!",
+                startDesc: "Tap the tiles to rotate wires and connect power to the appliance.<br>The board expands up to 9x9!",
                 startBtn: "START REPAIR",
                 gameOverDesc: "Repair time is over!",
                 finalScore: "Total Score",
@@ -280,7 +283,7 @@
                 namePlaceholder: "Enter Student ID",
                 submitBtn: "Submit Score",
                 retryBtn: "Try Again",
-                toastSuccess: "The score has been uploaded to the leaderboard!",
+                toastSuccess: "Score uploaded to leaderboard!",
                 toastFail: "Connection unstable, upload failed.",
                 toastTest: "GAS URL not set, test mode only.",
                 btnSubmitting: "Submitting...",
@@ -293,7 +296,9 @@
                 thLevel: "Level",
                 loading: "Loading...",
                 connectError: "Unable to connect to leaderboard",
-                refresh: "Refresh"
+                refresh: "Refresh",
+                syncing: "Syncing...",
+                updated: "Updated"
             }
         };
 
@@ -302,10 +307,10 @@
             document.getElementById('langBtn').innerText = currentLang === 'zh' ? 'EN' : 'ZH';
             document.title = currentLang === 'zh' ? "電路維修員 - NTUT AIoTFixer" : "Circuit Fixer - NTUT AIoTFixer";
             applyLanguage();
-            // 如果排行榜視窗正開著，順便重新渲染更新語系
+            
             const modal = document.getElementById('overlay-leaderboard');
-            if (modal && !modal.classList.contains('hidden')) {
-                fetchModalLeaderboard();
+            if (modal && !modal.classList.contains('hidden') && cachedLeaderboardData) {
+                renderModalBoard(cachedLeaderboardData); // 重新渲染以更新翻譯
             }
         }
 
@@ -313,17 +318,13 @@
             const elements = document.querySelectorAll('[data-i18n]');
             elements.forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (i18n[currentLang][key]) {
-                    el.innerHTML = i18n[currentLang][key];
-                }
+                if (i18n[currentLang][key]) el.innerHTML = i18n[currentLang][key];
             });
 
             const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
             placeholders.forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
-                if (i18n[currentLang][key]) {
-                    el.setAttribute('placeholder', i18n[currentLang][key]);
-                }
+                if (i18n[currentLang][key]) el.setAttribute('placeholder', i18n[currentLang][key]);
             });
             
             const submitBtn = document.getElementById('btn-submit-score');
@@ -332,32 +333,23 @@
             }
         }
 
-        // 分數差異化紀錄變數
+        // 跳脫字元函數 (必須全域定義，防止報錯)
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        // --- 遊戲邏輯區 ---
         let levelClicks = 0;
         let levelStartTime = 0;
-
         const boardEl = document.getElementById('gameBoard');
 
-        // 注意：線條寬度設為 24，在響應式網格中會剛好與外側的 absolute 接頭視覺粗細一致
-        const SVG_STRAIGHT = `
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-                <line x1="50" y1="0" x2="50" y2="100" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
-            </svg>`;
-            
-        const SVG_CORNER = `
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-                <path d="M 50 0 L 50 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
-            </svg>`;
-
-        const SVG_T_SHAPE = `
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-                <path d="M 50 0 L 50 100 M 50 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
-            </svg>`;
-            
-        const SVG_CROSS = `
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-                <path d="M 50 0 L 50 100 M 0 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/>
-            </svg>`;
+        const SVG_STRAIGHT = `<svg viewBox="0 0 100 100" class="w-full h-full"><line x1="50" y1="0" x2="50" y2="100" class="wire-base {{STATE_CLASS}}" stroke-width="24"/></svg>`;
+        const SVG_CORNER = `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M 50 0 L 50 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/></svg>`;
+        const SVG_T_SHAPE = `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M 50 0 L 50 100 M 50 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/></svg>`;
+        const SVG_CROSS = `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M 50 0 L 50 100 M 0 50 L 100 50" class="wire-base {{STATE_CLASS}}" stroke-width="24"/></svg>`;
 
         function initGame() {
             level = 1;
@@ -383,12 +375,10 @@
             nextLevel();
             
             timerInterval = setInterval(() => {
-                if (!isPlaying) return;
+                if (!isPlaying) return; // 暫停機制的核心：如果 isPlaying 為 false 就跳過扣秒
                 timeLeft--;
                 updateUI();
-                if (timeLeft <= 0) {
-                    gameOver();
-                }
+                if (timeLeft <= 0) gameOver();
             }, 1000);
         }
 
@@ -408,88 +398,57 @@
 
         function nextLevel() {
             isAnimating = true;
-            
-            // 重置點擊次數與記錄開始時間
             levelClicks = 0;
             levelStartTime = Date.now();
             
-            // 隨機抽選一台故障家電
             currentAppliance = appliances[Math.floor(Math.random() * appliances.length)];
             resetApplianceUI();
 
-            // 根據關卡動態擴展網格大小 (5x5 -> 7x7 -> 9x9)
             if (level <= 2) currentGridSize = 5;
             else if (level <= 5) currentGridSize = 7;
             else currentGridSize = 9;
 
-            // 起點終點始終保持在垂直正中央
             startRow = Math.floor(currentGridSize / 2);
             startCol = 0;
             endRow = Math.floor(currentGridSize / 2);
             endCol = currentGridSize - 1;
 
-            // 設定 CSS Grid 欄位數
             boardEl.style.gridTemplateColumns = `repeat(${currentGridSize}, minmax(0, 1fr))`;
-
-            // 初始化二維陣列
             board = Array(currentGridSize).fill(null).map(() => Array(currentGridSize).fill(null));
             
-            // 1. 產生必勝路徑 (DFS)
             let path = generateRandomPath(currentGridSize, startRow, startCol, endRow, endCol);
 
-            // 2. 配置正確的方塊類型
             for (let i = 0; i < path.length; i++) {
                 let curr = path[i];
-                let prev = i > 0 ? path[i-1] : {r: startRow, c: startCol - 1}; // 起點外側虛擬節點
-                let next = i < path.length - 1 ? path[i+1] : {r: endRow, c: endCol + 1}; // 終點外側虛擬節點
+                let prev = i > 0 ? path[i-1] : {r: startRow, c: startCol - 1};
+                let next = i < path.length - 1 ? path[i+1] : {r: endRow, c: endCol + 1};
 
                 let dr1 = curr.r - prev.r, dc1 = curr.c - prev.c;
                 let dr2 = next.r - curr.r, dc2 = next.c - curr.c;
 
-                // 決定電流的入口與出口方向
                 let inDir = (dr1 === -1) ? DIR_BOTTOM : (dr1 === 1) ? DIR_TOP : (dc1 === -1) ? DIR_RIGHT : DIR_LEFT;
                 let outDir = (dr2 === -1) ? DIR_TOP : (dr2 === 1) ? DIR_BOTTOM : (dc2 === -1) ? DIR_LEFT : DIR_RIGHT;
 
-                // 根據路徑決定可用的方塊類型 (加入 T型與十字型)
                 let typeOptions = [];
-                if (inDir === (outDir + 2) % 4) {
-                    typeOptions = [TILE_STRAIGHT, TILE_CROSS, TILE_T_SHAPE]; // 直線關係
-                } else {
-                    typeOptions = [TILE_CORNER, TILE_T_SHAPE, TILE_CROSS];   // 轉角關係
-                }
+                if (inDir === (outDir + 2) % 4) typeOptions = [TILE_STRAIGHT, TILE_CROSS, TILE_T_SHAPE];
+                else typeOptions = [TILE_CORNER, TILE_T_SHAPE, TILE_CROSS];
 
-                // 隨機選一個支援此路徑的類型 (降低複雜方塊出現機率，保持畫面清爽)
                 let type = typeOptions[0]; 
-                if (level > 2 && Math.random() > 0.75) {
-                    type = typeOptions[Math.floor(Math.random() * typeOptions.length)];
-                }
+                if (level > 2 && Math.random() > 0.75) type = typeOptions[Math.floor(Math.random() * typeOptions.length)];
 
-                board[curr.r][curr.c] = {
-                    type: type,
-                    rot: Math.floor(Math.random() * 4), // 隨機打亂初始角度
-                    isPowered: false,
-                    isPath: true // 標記為必勝路徑，避免後續覆蓋
-                };
+                board[curr.r][curr.c] = { type: type, rot: Math.floor(Math.random() * 4), isPowered: false, isPath: true };
             }
 
-            // 3. 填滿其餘干擾方塊
             for (let r = 0; r < currentGridSize; r++) {
                 for (let c = 0; c < currentGridSize; c++) {
                     if (!board[r][c]) {
-                        // 隨機生成干擾方塊 (大幅降低 T 型與十字型的出現機率)
                         let rand = Math.random();
                         let fType = TILE_CORNER;
-                        if (rand > 0.95) fType = TILE_CROSS;         // 5% 機率出現十字
-                        else if (rand > 0.85) fType = TILE_T_SHAPE;  // 10% 機率出現 T 型
-                        else if (rand > 0.45) fType = TILE_STRAIGHT; // 40% 機率出現直線
-                                                                     // 剩下 45% 機率為轉角
+                        if (rand > 0.95) fType = TILE_CROSS;         
+                        else if (rand > 0.85) fType = TILE_T_SHAPE;  
+                        else if (rand > 0.45) fType = TILE_STRAIGHT; 
 
-                        board[r][c] = {
-                            type: fType,
-                            rot: Math.floor(Math.random() * 4),
-                            isPowered: false,
-                            isPath: false
-                        };
+                        board[r][c] = { type: fType, rot: Math.floor(Math.random() * 4), isPowered: false, isPath: false };
                     }
                 }
             }
@@ -505,11 +464,11 @@
             const text = document.getElementById('applianceText');
             const line = document.getElementById('endLine');
 
-            icon.className = `fa-solid ${currentAppliance.icon} text-slate-500 text-2xl md:text-4xl mb-1 md:mb-2 transition-all duration-300`;
-            box.className = "bg-cyber-panel border-2 border-slate-700 rounded-lg p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center shadow-lg";
+            icon.className = `fa-solid ${currentAppliance.icon} text-slate-500 text-xl sm:text-2xl md:text-4xl mb-0.5 md:mb-2 transition-all duration-300`;
+            box.className = "bg-cyber-panel border sm:border-2 border-slate-700 rounded-md sm:rounded-lg p-1 sm:p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center shadow-lg";
             text.innerHTML = `${currentAppliance.name}<br>OFF`;
-            text.className = "text-[10px] md:text-xs font-bold text-slate-500 leading-tight transition-colors duration-300";
-            line.className = "absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-cyber-line z-0 pointer-events-none transition-colors duration-300";
+            text.className = "text-[8px] sm:text-[10px] md:text-xs font-bold text-slate-500 leading-tight transition-colors duration-300";
+            line.className = "absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[10px] sm:h-[14px] md:h-[22px] bg-cyber-line z-0 pointer-events-none transition-colors duration-300";
         }
 
         function generateRandomPath(size, sr, sc, er, ec) {
@@ -518,35 +477,27 @@
             
             function dfs(r, c) {
                 if (r < 0 || r >= size || c < 0 || c >= size || visited[r][c]) return false;
-                
                 path.push({r, c});
                 visited[r][c] = true;
+                if (r === er && c === ec) return true;
 
-                if (r === er && c === ec) return true; // 抵達終點
-
-                // 隨機化搜尋方向 (上右下左)
                 let dirs = [[-1,0], [0,1], [1,0], [0,-1]];
                 dirs.sort(() => Math.random() - 0.5);
 
                 for (let d of dirs) {
-                    // 為了美觀，避免產生太曲折的死亡螺旋，限制只能朝著終點大方向走，或者允許小繞路
                     if (dfs(r + d[0], c + d[1])) return true;
                 }
-
-                path.pop(); // 回溯
+                path.pop();
                 visited[r][c] = false;
                 return false;
             }
 
-            // 強制從起點往右出發，確保起點連線順暢
             path.push({r: sr, c: sc});
             visited[sr][sc] = true;
             if (!dfs(sr, sc + 1)) {
-                // 防呆：如果隨機失敗，產生直線
                 path = [];
                 for(let i=0; i<size; i++) path.push({r:sr, c:i});
             }
-
             return path;
         }
 
@@ -557,8 +508,7 @@
                     const tile = board[r][c];
                     const div = document.createElement('div');
                     div.id = `tile-${r}-${c}`;
-                    div.className = `w-full h-full bg-slate-900 rounded md:rounded-lg cursor-pointer tile flex items-center justify-center border border-slate-800 hover:bg-slate-800 overflow-hidden`;
-                    // 點擊旋轉事件
+                    div.className = `w-full h-full bg-slate-900 rounded-[3px] md:rounded-md cursor-pointer tile flex items-center justify-center border border-slate-800 hover:bg-slate-800 overflow-hidden`;
                     div.onclick = () => rotateTile(r, c);
                     
                     let svgStr = "";
@@ -567,9 +517,7 @@
                     else if (tile.type === TILE_T_SHAPE) svgStr = SVG_T_SHAPE;
                     else if (tile.type === TILE_CROSS) svgStr = SVG_CROSS;
 
-                    // 初始化時先設定為未通電顏色
                     svgStr = svgStr.replace('{{STATE_CLASS}}', 'wire-off');
-                    
                     div.innerHTML = svgStr;
                     div.style.transform = `rotate(${tile.rot * 90}deg)`;
                     boardEl.appendChild(div);
@@ -579,23 +527,16 @@
 
         function rotateTile(r, c) {
             if (!isPlaying || isAnimating) return;
-            
-            levelClicks++; // 記錄點擊步數
-            
+            levelClicks++;
             board[r][c].rot = (board[r][c].rot + 1) % 4;
             const el = document.getElementById(`tile-${r}-${c}`);
             el.style.transform = `rotate(${board[r][c].rot * 90}deg)`;
-            
-            // 每次旋轉後重新計算電力
             checkPowerConnection();
         }
 
         function getOutputs(tile) {
-            // 根據方塊類型與當前旋轉角度，回傳它會往哪些方向輸出
-            // 0:上, 1:右, 2:下, 3:左
-            if (tile.type === TILE_STRAIGHT) {
-                return (tile.rot % 2 === 0) ? [0, 2] : [1, 3];
-            } else if (tile.type === TILE_CORNER) {
+            if (tile.type === TILE_STRAIGHT) return (tile.rot % 2 === 0) ? [0, 2] : [1, 3];
+            else if (tile.type === TILE_CORNER) {
                 if (tile.rot === 0) return [0, 1];
                 if (tile.rot === 1) return [1, 2];
                 if (tile.rot === 2) return [2, 3];
@@ -605,65 +546,44 @@
                 if (tile.rot === 1) return [1, 2, 3];
                 if (tile.rot === 2) return [2, 3, 0];
                 if (tile.rot === 3) return [3, 0, 1];
-            } else if (tile.type === TILE_CROSS) {
-                return [0, 1, 2, 3];
-            }
+            } else if (tile.type === TILE_CROSS) return [0, 1, 2, 3];
             return [];
         }
 
         function checkPowerConnection() {
-            // 1. 重置所有通電狀態
             for (let r = 0; r < currentGridSize; r++) {
-                for (let c = 0; c < currentGridSize; c++) {
-                    board[r][c].isPowered = false;
-                }
+                for (let c = 0; c < currentGridSize; c++) board[r][c].isPowered = false;
             }
 
-            // 2. BFS 尋找連通
-            // 佇列元素：{r, c, 入口方向}
-            // 起點：固定在 (startRow, 0)，電力從左邊 (DIR_LEFT = 3) 進入
             let queue = [{r: startRow, c: startCol, incomingDir: DIR_LEFT}];
             let levelComplete = false;
 
             while (queue.length > 0) {
                 let curr = queue.shift();
                 let tile = board[curr.r][curr.c];
-
-                // 取得此方塊能接通的方向
                 let outputs = getOutputs(tile);
 
-                // 如果方塊的開口正好有接住「入口方向」，代表通電成功
                 if (outputs.includes(curr.incomingDir) && !tile.isPowered) {
                     tile.isPowered = true;
-
-                    // 找出電力要從哪些開口繼續輸出 (支援多分支分流)
                     let outDirs = outputs.filter(d => d !== curr.incomingDir);
                     
                     for (let outDir of outDirs) {
-                        // 決定下一個方塊的座標
                         let nr = curr.r, nc = curr.c;
                         if (outDir === DIR_TOP) nr--;
                         else if (outDir === DIR_RIGHT) nc++;
                         else if (outDir === DIR_BOTTOM) nr++;
                         else if (outDir === DIR_LEFT) nc--;
 
-                        // 判斷勝利：如果電力抵達終點方塊 (endRow, endCol) 且向右輸出 (DIR_RIGHT)
                         if (curr.r === endRow && curr.c === endCol && outDir === DIR_RIGHT) {
                             levelComplete = true;
-                        } 
-                        // 否則繼續傳遞電力到下個網格
-                        else if (nr >= 0 && nr < currentGridSize && nc >= 0 && nc < currentGridSize) {
-                            // 下個方塊的入口方向，剛好是當前方塊出口方向的相反
-                            let nextIncomingDir = (outDir + 2) % 4;
-                            queue.push({r: nr, c: nc, incomingDir: nextIncomingDir});
+                        } else if (nr >= 0 && nr < currentGridSize && nc >= 0 && nc < currentGridSize) {
+                            queue.push({r: nr, c: nc, incomingDir: (outDir + 2) % 4});
                         }
                     }
                 }
             }
 
             updateDomStyles(levelComplete);
-
-            // 處理過關
             if (levelComplete) {
                 isAnimating = true;
                 handleLevelComplete();
@@ -677,7 +597,6 @@
                     const el = document.getElementById(`tile-${r}-${c}`);
                     const pathEl = el.querySelector('.wire-base');
                     
-                    // 移除舊狀態
                     pathEl.classList.remove('wire-off', 'wire-on', 'wire-finish');
                     el.classList.remove('neon-glow', 'neon-success', 'border-cyan-500', 'border-emerald-500', 'border-slate-800');
                     
@@ -696,45 +615,33 @@
         }
 
         function handleLevelComplete() {
-            // 右側家電啟動特效
             const icon = document.getElementById('applianceIcon');
             const box = document.getElementById('applianceBox');
             const text = document.getElementById('applianceText');
             const line = document.getElementById('endLine');
 
-            line.className = "absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[14px] md:h-[22px] bg-emerald-500 z-0 pointer-events-none transition-colors duration-300";
-            box.className = "bg-cyber-panel border-2 border-emerald-500 rounded-lg p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center neon-success shadow-lg";
+            line.className = "absolute right-1/2 top-1/2 -translate-y-1/2 w-[200%] h-[10px] sm:h-[14px] md:h-[22px] bg-emerald-500 z-0 pointer-events-none transition-colors duration-300";
+            box.className = "bg-cyber-panel border sm:border-2 border-emerald-500 rounded-md sm:rounded-lg p-1 sm:p-2 text-center w-full relative z-10 transition-all duration-300 flex flex-col items-center neon-success shadow-lg";
+            icon.className = `fa-solid ${currentAppliance.icon} text-emerald-400 text-xl sm:text-2xl md:text-4xl mb-0.5 md:mb-2 animate-bounce`;
             
-            icon.className = `fa-solid ${currentAppliance.icon} text-emerald-400 text-2xl md:text-4xl mb-1 md:mb-2 animate-bounce`;
-            
-            // 針對風扇，使用旋轉特效代替彈跳
             if(currentAppliance.icon === 'fa-fan') {
                 icon.classList.add('animate-spin');
                 icon.classList.remove('animate-bounce');
             }
             
             text.innerHTML = `${currentAppliance.name}<br>ON`;
-            text.className = "text-[10px] md:text-xs font-bold text-emerald-400 leading-tight";
+            text.className = "text-[8px] sm:text-[10px] md:text-xs font-bold text-emerald-400 leading-tight";
 
-            // 計算差異化分數
             let timeSpent = Math.max(1, Math.floor((Date.now() - levelStartTime) / 1000));
             let baseScore = level * 100;
-            
-            // 1. 速度加分：越快完成分數越高 (基準為 30 秒)
             let timeBonus = Math.max(0, 30 - timeSpent) * 10 * level;
-            
-            // 2. 步數加分：點擊次數越少分數越高 (容錯基準為總格數的 3 倍)
             let clickTarget = currentGridSize * currentGridSize * 3;
             let clickBonus = Math.max(0, clickTarget - levelClicks) * 5 * level;
-
-            // 結算總得分
             let earnedScore = Math.floor(baseScore + timeBonus + clickBonus);
+            
             score += earnedScore;
-
-            // 顯示浮動加分特效
             showFloatingScore(earnedScore);
 
-            // 紙花慶祝
             confetti({
                 particleCount: 100,
                 spread: 70,
@@ -742,15 +649,11 @@
                 colors: ['#0ea5e9', '#10b981', '#ffffff', '#f59e0b']
             });
 
-            // 延時與過關
             timeLeft += 10;
             level++;
             updateUI();
 
-            // 延遲後進入下一關
-            setTimeout(() => {
-                nextLevel();
-            }, 1500);
+            setTimeout(() => { nextLevel(); }, 1500);
         }
 
         function showFloatingScore(earned) {
@@ -758,10 +661,7 @@
             floating.innerHTML = `<span class="text-xl md:text-2xl mr-1">+</span>${earned}`;
             floating.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-6xl font-black text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.8)] z-50 pointer-events-none animate-float-up';
             document.querySelector('main').appendChild(floating);
-
-            setTimeout(() => {
-                floating.remove();
-            }, 1200);
+            setTimeout(() => { floating.remove(); }, 1200);
         }
 
         function alertCustom(msg) {
@@ -775,67 +675,58 @@
             }, 3000);
         }
 
-        // --- Google Apps Script 網址設定區 ---
-        // 請將下方引號內的網址，替換成你部署 Google Apps Script 後獲得的 Web App URL
+        // --- 排行榜與 API 區 ---
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyniTBbW9ySb-UDCFFBVfeM9CE_PzlGu4TiarBnXwqTPH6SYjTsUSVpd-siFmq2iX3-/exec"; 
         
-        // --- 新增：排行榜彈出視窗控制函數 ---
+        let cachedLeaderboardData = null;
+        let isFetchingLeaderboard = false;
+
         function openLeaderboardModal() {
-            // 如果遊戲正在進行中，暫停計時
             if (isPlaying) {
-                isPlaying = false;
+                isPlaying = false; // 暫停遊戲計時
                 isPausedByModal = true;
             }
-            
             document.getElementById('overlay-leaderboard').classList.remove('hidden');
-            fetchModalLeaderboard(true); // 開啟時觸發更新
+            
+            // 開啟時，如果已有快取則瞬間顯示，並在背景觸發更新
+            fetchModalLeaderboard(false); 
         }
 
         function closeLeaderboardModal() {
             document.getElementById('overlay-leaderboard').classList.add('hidden');
-            
-            // 如果剛才是因為看排行榜而暫停的，關閉時恢復計時
             if (isPausedByModal) {
-                isPlaying = true;
+                isPlaying = true; // 恢復遊戲計時
                 isPausedByModal = false;
             }
         }
 
-        // 安全跳脫字元，防止 XSS 注入攻擊與渲染錯誤
-        function escapeHTML(str) {
-            if (!str) return '';
-            return String(str).replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-
-        // --- 排行榜優化：快取與背景抓取機制 ---
-        let cachedLeaderboardData = null;
-        let isFetchingLeaderboard = false;
-
-        function fetchModalLeaderboard(showLoadingUI = false) {
+        function fetchModalLeaderboard(forceRefresh = false) {
             const tbody = document.getElementById('modal-leaderboard-body');
+            const syncStatus = document.getElementById('modal-sync-status');
+            const refreshIcon = document.getElementById('icon-refresh');
+            const refreshBtn = document.getElementById('btn-refresh-board');
             
-            // 1. 如果已經有快取資料，瞬間渲染 (極致流暢體驗)
-            if (cachedLeaderboardData) {
+            // 如果有快取且非強制刷新，瞬間渲染
+            if (cachedLeaderboardData && !forceRefresh) {
                 renderModalBoard(cachedLeaderboardData);
-            } else if (showLoadingUI) {
-                // 只有在完全沒有快取時，才顯示載入中
+            } else if (!cachedLeaderboardData) {
+                // 完全沒快取時才顯示載入中
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500 animate-pulse">${i18n[currentLang].loading}</td></tr>`;
             }
 
-            // 避免重複同時發送請求
             if (isFetchingLeaderboard) return;
             isFetchingLeaderboard = true;
 
-            // 2. 背景向 GAS 請求最新資料
+            // UI 更新中狀態
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+            if (refreshBtn) refreshBtn.disabled = true;
+            if (syncStatus) syncStatus.innerHTML = `<span class="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse"></span> <span class="text-amber-400/80">${i18n[currentLang].syncing}</span>`;
+
             if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "請在此填入您的_GAS_網址") {
                 fetch(GAS_WEB_APP_URL)
                     .then(response => response.json())
                     .then(records => {
-                        cachedLeaderboardData = records; // 更新快取
-                        
-                        // 如果排行榜視窗正開著，無縫更新最新資料
+                        cachedLeaderboardData = records;
                         const modal = document.getElementById('overlay-leaderboard');
                         if (modal && !modal.classList.contains('hidden')) {
                             renderModalBoard(records);
@@ -843,29 +734,44 @@
                     })
                     .catch(error => {
                         console.error("抓取排行榜失敗:", error);
-                        // 只有在沒有快取時才顯示錯誤訊息
-                        if (!cachedLeaderboardData && showLoadingUI) {
+                        if (!cachedLeaderboardData) {
                             tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500">${i18n[currentLang].connectError}</td></tr>`;
                         }
                     })
                     .finally(() => {
                         isFetchingLeaderboard = false;
+                        // 恢復 UI 狀態
+                        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+                        if (refreshBtn) refreshBtn.disabled = false;
+                        if (syncStatus) {
+                            syncStatus.innerHTML = `<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> <span class="text-emerald-500/80">${i18n[currentLang].updated}</span>`;
+                            setTimeout(() => { if (syncStatus) syncStatus.innerHTML = ''; }, 2000);
+                        }
                     });
             } else {
-                const mockData = [
-                    { name: '電機謝同學', score: 15400, level: 6 },
-                    { name: '資工小神童', score: 12300, level: 5 },
-                    { name: '電子小王', score: 9800, level: 4 }
-                ];
-                cachedLeaderboardData = mockData;
-                renderModalBoard(mockData);
-                isFetchingLeaderboard = false;
+                // 本機測試假資料
+                setTimeout(() => {
+                    const mockData = [
+                        { name: '電機謝同學', score: 15400, level: 6 },
+                        { name: 'AIoT 小神童', score: 12300, level: 5 },
+                        { name: '維修老手', score: 9800, level: 4 }
+                    ];
+                    cachedLeaderboardData = mockData;
+                    renderModalBoard(mockData);
+                    isFetchingLeaderboard = false;
+                    if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+                    if (refreshBtn) refreshBtn.disabled = false;
+                    if (syncStatus) syncStatus.innerHTML = `<span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> <span class="text-emerald-500/80">${i18n[currentLang].updated}</span>`;
+                }, 800);
             }
         }
 
         function renderModalBoard(records) {
             const tbody = document.getElementById('modal-leaderboard-body');
             tbody.innerHTML = '';
+
+            // 局部防呆，確保 escapeHTML 存在
+            const safeEscape = (typeof escapeHTML === 'function') ? escapeHTML : (str => String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)));
 
             if (!records || records.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-500">尚無維修紀錄</td></tr>`;
@@ -874,7 +780,7 @@
 
             records.forEach((record, index) => {
                 const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-800/50 hover:bg-slate-900/50";
+                tr.className = "border-b border-slate-800/50 hover:bg-slate-900/50 transition-colors";
                 
                 let rankClass = "text-slate-400";
                 if (index === 0) rankClass = "text-amber-400 font-bold";
@@ -882,10 +788,10 @@
                 else if (index === 2) rankClass = "text-amber-600 font-bold";
 
                 tr.innerHTML = `
-                    <td class="py-3 px-3 font-mono ${rankClass}">#${index + 1}</td>
-                    <td class="py-3 px-3 text-slate-200">${escapeHTML(record.name)}</td>
-                    <td class="py-3 px-3 text-right font-mono text-cyan-400 font-bold">${record.score.toLocaleString()}</td>
-                    <td class="py-3 px-3 text-center font-mono"><span class="bg-slate-800 px-2 py-0.5 rounded text-xs text-slate-300">Lv.${record.level}</span></td>
+                    <td class="py-2.5 md:py-3 px-2 md:px-3 font-mono text-[11px] md:text-sm ${rankClass}">#${index + 1}</td>
+                    <td class="py-2.5 md:py-3 px-2 md:px-3 text-slate-200 text-[11px] md:text-sm font-bold truncate max-w-[80px] sm:max-w-[120px] md:max-w-[200px]" title="${safeEscape(record.name)}">${safeEscape(record.name)}</td>
+                    <td class="py-2.5 md:py-3 px-2 md:px-3 text-right font-mono text-cyan-400 font-bold text-xs md:text-base">${record.score.toLocaleString()}</td>
+                    <td class="py-2.5 md:py-3 px-2 md:px-3 text-center font-mono"><span class="bg-slate-800 px-1.5 py-0.5 rounded text-[10px] md:text-xs text-slate-300 border border-slate-700">Lv.${record.level}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -900,7 +806,6 @@
             btn.disabled = true;
             btn.classList.add('opacity-75');
 
-            // 背景同步發送至 Google 試算表 (使用 no-cors 避免跨域阻擋)
             if (GAS_WEB_APP_URL !== "請在此填入您的_GAS_網址" && GAS_WEB_APP_URL !== "") {
                 const formData = new URLSearchParams();
                 formData.append('name', name);
@@ -910,11 +815,12 @@
                 fetch(GAS_WEB_APP_URL, {
                     method: 'POST',
                     body: formData,
-                    mode: 'no-cors' // 單向送出不求回傳，最穩定
+                    mode: 'no-cors' 
                 }).then(() => {
-                    console.log("成績已上傳");
                     alertCustom(i18n[currentLang].toastSuccess);
                     btn.innerText = i18n[currentLang].btnSubmitted;
+                    // 上傳後強制更新快取
+                    setTimeout(() => fetchModalLeaderboard(true), 1500);
                 }).catch(e => {
                     console.error("GAS 同步失敗:", e);
                     alertCustom(i18n[currentLang].toastFail);
@@ -931,14 +837,12 @@
         // 初始化遊戲與預設語言
         applyLanguage();
         initGame();
-
-        // 設定動態版權年份
         document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        // 遊戲載入完畢後，偷偷在背景預先抓取一次排行榜資料 (Pre-fetching)
+        // 預先載入 (Pre-fetching) 確保打開排行榜 0 延遲
         setTimeout(() => {
             fetchModalLeaderboard(false);
-        }, 1000);
+        }, 1500);
 
     </script>
 </body>
